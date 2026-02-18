@@ -145,48 +145,41 @@ end
 
 -- AUTO SPAWN JOB VEHICLES IF MISSING
 function checkAndSpawnJobVehicles()
-	-- 1. VERİTABANI TEMİZLİĞİ (Tüm sahipsiz iş araçlarını tek seferde uçurur)
+	-- 1. EN KAPSAMLI TEMİZLİK (Veritabanı ve Mevcut Araçlar)
 	mysql:query_free("DELETE FROM vehicles WHERE model IN (431, 420, 438) AND owner = -1 AND faction = -1")
-	outputDebugString("[JOB-SYSTEM] Database cleared for sahess (owner -1, faction -1) buses and taxis.")
-
-	-- 2. CANLI ELEMENT TEMİZLİĞİ (Görünürdeki araçları yok eder)
-	local vehicles = getElementsByType("vehicle")
-	local count = 0
-	for _, veh in pairs(vehicles) do
+	
+	local allVehicles = getElementsByType("vehicle")
+	for _, veh in pairs(allVehicles) do
 		local model = getElementModel(veh)
 		local owner = getElementData(veh, "owner") or -1
 		local faction = getElementData(veh, "faction") or -1
-		
-		-- Sahipsiz ve Job modellerinden ise (Otobüs/Taksi) sil
 		if (model == 431 or model == 420 or model == 438) and owner == -1 and faction == -1 then
 			destroyElement(veh)
-			count = count + 1
 		end
 	end
-	outputDebugString("[JOB-SYSTEM] " .. count .. " existing vehicle elements destroyed.")
+	outputDebugString("[JOB-SYSTEM] Extensive cleanup finished.")
 
-	-- 3. YAKIT GÜNCELLEMESİ (Halihazırda kalan diğer iş araçları varsa diye)
-	mysql:query_free("UPDATE vehicles SET fuel=100 WHERE faction=-1 AND job > 0")
-
-	-- 4. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı)
-	outputDebugString("[JOB-SYSTEM] Spawning 7-7 fresh buses and taxis with 100 fuel...")
+	-- 2. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı 12 birim mesafe)
+	outputDebugString("[JOB-SYSTEM] Spawning 14 vehicles with model-specific full fuel...")
 	
 	local startY = -1890
-	local spacing = 12
+	local spacingY = 12
+	local busX = 1790
+	local taxiX = 1802 -- 1802 - 1790 = 12 birim (Kullanıcı isteği)
 
 	for i = 1, 7 do
-		local currentY = startY - ((i-1) * spacing)
+		local currentY = startY - ((i-1) * spacingY)
 		
-		-- OTOBÜS (Sol Taraf - X: 1784)
-		local busQuery = "INSERT INTO vehicles SET model=431, x=1784, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=270, currx=1784, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=270, color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=100"
+		-- OTOBÜS (Sol - 800L Yakıt)
+		local busQuery = "INSERT INTO vehicles SET model=431, x="..busX..", y="..currentY..", z=13.4, rotx=0, roty=0, rotz=270, currx="..busX..", curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=270, color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=800"
 		mysql:query_free(busQuery)
 		
-		-- TAKSİ (Sağ Taraf - X: 1810)
-		local taxiQuery = "INSERT INTO vehicles SET model=420, x=1810, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=90, currx=1810, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=90, color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=100"
+		-- TAKSİ (Sağ - 60L Yakıt)
+		local taxiQuery = "INSERT INTO vehicles SET model=420, x="..taxiX..", y="..currentY..", z=13.4, rotx=0, roty=0, rotz=90, currx="..taxiX..", curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=90, color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=60"
 		mysql:query_free(taxiQuery)
 	end
 
-	-- 5. ARAÇLARI YENİDEN YÜKLE VE YAKITLARINI SETLE
+	-- 3. ARAÇ SENKRONİZASYONU
 	setTimer(function() 
 		if getResourceFromName("vehicle_load") then
 			restartResource(getResourceFromName("vehicle_load")) 
@@ -194,12 +187,18 @@ function checkAndSpawnJobVehicles()
 				local currentVehicles = getElementsByType("vehicle")
 				for _, veh in pairs(currentVehicles) do
 					local job = getElementData(veh, "job") or 0
-					if job > 0 and (getElementData(veh, "faction") or -1) == -1 then
-						exports.anticheat:setEld(veh, "fuel", 100)
+					local faction = getElementData(veh, "faction") or -1
+					if faction == -1 and job > 0 then
+						local model = getElementModel(veh)
+						if model == 431 then 
+							exports.anticheat:setEld(veh, "fuel", 800) -- Bus Full
+						elseif model == 420 or model == 438 then 
+							exports.anticheat:setEld(veh, "fuel", 60) -- Taxi Full
+						end
 					end
 				end
-				outputDebugString("[JOB-SYSTEM] Final check: 14 vehicles reloaded and fueled up to 100.")
-			end, 2000, 1)
+				outputDebugString("[JOB-SYSTEM] Layout and fuel issues fixed permanently.")
+			end, 3000, 1)
 		end
 	end, 3000, 1)
 end
