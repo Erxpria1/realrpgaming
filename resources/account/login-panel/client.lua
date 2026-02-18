@@ -11,9 +11,9 @@ local panel = {
 		login = {},
 		register = {},
 		sounds = {
-			{ 'http://files.owlgaming.net/menu.mp3', 0.3 },
-			{ 'http://files.owlgaming.net/gtav.mp3', 0.3 },
-			{ 'http://files.owlgaming.net/gtaiv.mp3', 0.3 },
+			-- { 'http://files.owlgaming.net/menu.mp3', 0.3 },
+			-- { 'http://files.owlgaming.net/gtav.mp3', 0.3 },
+			-- { 'http://files.owlgaming.net/gtaiv.mp3', 0.3 },
 		}
 	}
 local sw, sh = guiGetScreenSize()
@@ -572,7 +572,7 @@ function displayRegisterConpleteText(username)
     guiWindowSetMovable(GUIEditor.window[1], false)
     guiWindowSetSizable(GUIEditor.window[1], false)
     guiSetProperty(GUIEditor.window[1], "AlwaysOnTop", "True")
-    local temp = "An email contains instructions to activate your account has been dispatched, please check your email's inbox.\n\nIf for some reasons you don't receive the email, please check your junk box or try to dispatch another activation email at https://realroleplaygaming.net/account/"
+    local temp = "An email contains instructions to activate your account has been dispatched, please check your email's inbox.\n\nIf for some reasons you don't receive the email, please check your junk box or try to dispatch another activation email at https://realrpgaming.net/account/"
     GUIEditor.label[1] = guiCreateLabel(8, 50, 339, 121+extend, "Your Real Roleplay Gaming account for '"..username.."' is almost ready for action!\n\n"..temp.."\n\nSincerely, \nReal Roleplay Gaming Team\"", false, GUIEditor.window[1])
     guiLabelSetHorizontalAlign(GUIEditor.label[1], "left", true)
 
@@ -583,7 +583,7 @@ function displayRegisterConpleteText(username)
     			destroyElement(GUIEditor.window[1])
     			GUIEditor = nil
     			switchToLoginPanel()
-    			setClipboard("https://realroleplaygaming.net/account/")
+    			setClipboard("https://realrpgaming.net/account/")
     		end
     	else
     		cancelEvent()
@@ -716,9 +716,9 @@ end)
 
 function drawLoginScreenBranding()
 	local sWidth, sHeight = guiGetScreenSize()
-	dxDrawText("OWL GAMING NET", 2, sHeight * 0.15 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 2.5, "bankgothic", "center", "top", false, false, true)
-	dxDrawText("OWL GAMING NET", 0, sHeight * 0.15, sWidth, sHeight, tocolor(255, 255, 255, 255), 2.5, "bankgothic", "center", "top", false, false, true)
+	dxDrawText("REAL ROLEPLAY GAMING", 2, sHeight * 0.15 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 2.5, "bankgothic", "center", "top", false, false, true)
+	dxDrawText("REAL ROLEPLAY GAMING", 0, sHeight * 0.15, sWidth, sHeight, tocolor(255, 255, 255, 255), 2.5, "bankgothic", "center", "top", false, false, true)
 
-	dxDrawText("REAL ROLEPLAY GAMING", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
-	dxDrawText("REAL ROLEPLAY GAMING", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
+	dxDrawText("ROLEPLAY SERVER", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
+	dxDrawText("ROLEPLAY SERVER", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
 end

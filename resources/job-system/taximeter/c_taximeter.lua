@@ -19,11 +19,49 @@ local root = getRootElement()
 local localPlayer = getLocalPlayer()
 local driversSendSyncTimer = nil
 
+local screenW, screenH = guiGetScreenSize()
+local font = "default-bold"
+
+function renderTaxiInfo()
+	if not isPedInVehicle(localPlayer) then return end
+	
+	local statusText = "Müşteri Bekleniyor"
+	local statusColor = tocolor(0, 255, 0, 200) -- Yeşil
+	
+	if meterRunning then
+		statusText = "Taksimetre AÇIK"
+		statusColor = tocolor(255, 0, 0, 200) -- Kırmızı
+	end
+	
+	-- Panel Çizimi (Alt Orta - Otobüs ile aynı stil)
+	local panelW, panelH = 350, 90
+	local panelX, panelY = (screenW - panelW) / 2, screenH - panelH - 50
+	
+	dxDrawRectangle(panelX, panelY, panelW, panelH, tocolor(0, 0, 0, 150))
+	dxDrawRectangle(panelX, panelY, panelW, 25, tocolor(255, 215, 0, 200)) -- Başlık çubuğu (Altın Sarısı)
+	
+	dxDrawText("TAKSİMETRE", panelX, panelY, panelX + panelW, panelY + 25, tocolor(255, 255, 255, 255), 1, font, "center", "center")
+	
+	-- İçerik
+	local totalFareStr = tostring(math.ceil(taxiFare*(taxiDistance/1000)))
+	local distanceStr = string.format("%.1f", tostring(taxiDistance/1000))
+	local rateStr = string.format("%.2f", tostring(taxiFare))
+	
+	dxDrawText(statusText, panelX, panelY + 30, panelX + panelW, panelY + 50, statusColor, 1.2, "default-bold", "center", "top")
+	
+	dxDrawText("Tutar: $" .. totalFareStr, panelX + 20, panelY + 55, panelX + panelW, panelY + 75, tocolor(255, 255, 255, 255), 1, "default-bold", "left", "top")
+	dxDrawText("Mesafe: " .. distanceStr .. " km", panelX, panelY + 55, panelX + panelW - 20, panelY + 75, tocolor(200, 200, 200, 255), 1, "default", "right", "top")
+	
+	dxDrawText("Tarife: $" .. rateStr .. "/km", panelX, panelY + 70, panelX + panelW, panelY + 90, tocolor(150, 150, 150, 200), 0.9, "default", "center", "top")
+end
+
 function showTaximeterGui()
 	if gui_base then
 		destroyElement(gui_base)
 		gui_base = nil
 	end
+	
+	addEventHandler("onClientRender", root, renderTaxiInfo) -- DX Paneli Başlat
 	
 	local screenX, screenY = guiGetScreenSize()
 	local width, height = 299, 168
@@ -77,9 +115,12 @@ function showTaximeterGui()
 		end
 	end
 	
+	-- GUI'yi gizle (Sadece DX kalsın istiyorsan burayı açabilirsin, şimdilik ikisi de kalsın)
+	guiSetVisible(gui_base, false) 
 end
 
 function hideTaximeterGui()
+	removeEventHandler("onClientRender", root, renderTaxiInfo) -- DX Paneli Durdur
 	if gui_base then
 		destroyElement(gui_base)
 		gui_base = nil

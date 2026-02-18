@@ -9,6 +9,7 @@ local bus = { [431]=true, [437]=true }
 local blip
 
 function resetBusJob()
+	removeEventHandler("onClientRender", root, renderBusInfo) -- Paneli Kaldır
 	if (isElement(blip)) then
 		destroyElement(blip)
 		removeEventHandler("onClientVehicleEnter", getRootElement(), startBusJob)
@@ -37,6 +38,53 @@ function resetBusJob()
 	
 	m_number = 0
 	triggerServerEvent("payBusDriver", getLocalPlayer(), line, -1)
+end
+
+local screenW, screenH = guiGetScreenSize()
+local font = "default-bold"
+
+function renderBusInfo()
+	if not busMarker then return end
+	
+	local x, y, z = getElementPosition(busMarker)
+	local px, py, pz = getElementPosition(localPlayer)
+	local dist = getDistanceBetweenPoints3D(x, y, z, px, py, pz)
+	
+	local currentStopName = "Bilinmiyor"
+	local nextStopName = "Hat Sonu"
+	
+	if route and route.stops then
+		-- m_number, mevcut checkpoint indexi. Durak isimleri stops tablosunda.
+		-- Logic: route.points[i][5] durak numarasını veriyor.
+		
+		-- Mevcut hedef
+		local currentPointInfo = route.points[m_number]
+		if currentPointInfo then
+			if currentPointInfo[4] == true then -- Duraksa
+				currentStopName = route.stops[currentPointInfo[5]] or "Durak"
+			else -- Checkpoint ise
+				-- Bir sonraki durağı bulmaya çalış
+				for i = m_number, #route.points do
+					if route.points[i][4] == true then
+						currentStopName = "Yol Üzerinde -> " .. (route.stops[route.points[i][5]] or "Durak")
+						break
+					end
+				end
+			end
+		end
+	end
+
+	-- Panel Çizimi (Alt Orta)
+	local panelW, panelH = 400, 80
+	local panelX, panelY = (screenW - panelW) / 2, screenH - panelH - 50
+	
+	dxDrawRectangle(panelX, panelY, panelW, panelH, tocolor(0, 0, 0, 150))
+	dxDrawRectangle(panelX, panelY, panelW, 25, tocolor(255, 165, 0, 200)) -- Başlık çubuğu (Turuncu)
+	
+	dxDrawText("OTOBÜS GÜZERGAHI", panelX, panelY, panelX + panelW, panelY + 25, tocolor(255, 255, 255, 255), 1, font, "center", "center")
+	
+	dxDrawText("Hedef: " .. currentStopName, panelX + 10, panelY + 35, panelX + panelW - 10, panelY + 55, tocolor(255, 255, 255, 255), 1.2, "default-bold", "center", "top")
+	dxDrawText("Mesafe: " .. math.floor(dist) .. "m", panelX + 10, panelY + 55, panelX + panelW - 10, panelY + 75, tocolor(200, 200, 200, 255), 1, "default", "center", "top")
 end
 
 function displayBusJob()
@@ -91,12 +139,13 @@ function startBusJob()
 					busNextBlip = createBlip( nx, ny, nz, 0, 2, 255, 200, 0, 255)
 				end
 				
-				m_number = 0
+				m_number = 1 -- İlk nokta 1. indexten başlar
 				triggerServerEvent("payBusDriver", getLocalPlayer(), line, 0)
 				
 				setVehicleLocked(vehicle, true)
 				
-				exports.hud:sendBottomNotification(localPlayer, "Otobüs Şoförü", "Otobüs güzergahını takip edin ve durak noktalarında (kırmızı işaret) durun.")
+				exports.hud:sendBottomNotification(localPlayer, "Otobüs Şoförü", "Otobüs güzergahı başladı. İyi yolculuklar!")
+				addEventHandler("onClientRender", root, renderBusInfo) -- Panel Çizimini Başlat
 			else
 				exports.hud:sendBottomNotification(localPlayer, "Otobüs Şoförü", "Güzergah başlatmak için bir Otobüs veya Koç'ta olmanız gerekiyor.")
 			end
