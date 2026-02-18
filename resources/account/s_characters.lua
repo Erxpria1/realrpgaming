@@ -257,12 +257,13 @@ function spawnCharacter(characterID, remoteAccountID, theAdmin, targetAccountNam
         setPedGravity(client, 0)
 
         local locationToSpawn = {}
-        locationToSpawn.x = tonumber(characterData["x"])
-        locationToSpawn.y = tonumber(characterData["y"])
-        locationToSpawn.z = tonumber(characterData["z"])
-        locationToSpawn.rot = tonumber(characterData["rotation"])
-        locationToSpawn.int = tonumber(characterData["interior_id"])
-        locationToSpawn.dim = tonumber(characterData["dimension_id"])
+        -- Real Roleplay Gaming 2026 - Belediye Spawn
+        locationToSpawn.x = 1481.0
+        locationToSpawn.y = -1711.0
+        locationToSpawn.z = 14.1
+        locationToSpawn.rot = 0
+        locationToSpawn.int = 0
+        locationToSpawn.dim = 0
         spawnPlayer(client, locationToSpawn.x ,locationToSpawn.y ,locationToSpawn.z , locationToSpawn.rot, tonumber(characterData["skin"]))
         setElementDimension(client, locationToSpawn.dim)
         setElementInterior(client, locationToSpawn.int , locationToSpawn.x, locationToSpawn.y, locationToSpawn.z)
@@ -515,6 +516,18 @@ function spawnCharacter(characterID, remoteAccountID, theAdmin, targetAccountNam
         triggerEvent( "account:character:spawned", client ) -- have an event that we can call when a character is spawned.
         triggerClientEvent( client, "account:character:spawned", client ) -- have an event that we can call when a character is spawned.
         --outputDebugString('account:character:spawned')
+        
+        -- Real Roleplay Gaming 2026 - Welcome Message
+        setTimer(function(thePlayer)
+            if isElement(thePlayer) and getElementData(thePlayer, "loggedin") == 1 then
+                exports.announcement:makePlayerNotification(
+                    thePlayer,
+                    "🎮 REAL ROLEPLAY GAMING 2026",
+                    "2014'ten sonra 2026'da tekrar sizinleyiz!\n📍 instagram: @realroleplay\n💬 discord: discord.gg/realrpg\n\n🔍 Ekip Arıyoruz: Admin, Discord Moderatör",
+                    "info"
+                )
+            end
+        end, 2000, 1, client)
         if freshSpawn then
             triggerEvent( "social:look", client, client, ":edit" )
         end
