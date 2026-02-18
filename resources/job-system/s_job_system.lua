@@ -145,28 +145,31 @@ end
 
 -- AUTO SPAWN JOB VEHICLES IF MISSING
 function checkAndSpawnJobVehicles()
-	-- 1. ESKİ ARAÇLARI TEMİZLE
-	local vehicles = exports.pool:getPoolElementsByType("vehicle")
+	-- 1. VERİTABANI TEMİZLİĞİ (Tüm sahipsiz iş araçlarını tek seferde uçurur)
+	mysql:query_free("DELETE FROM vehicles WHERE model IN (431, 420, 438) AND owner = -1 AND faction = -1")
+	outputDebugString("[JOB-SYSTEM] Database cleared for sahess (owner -1, faction -1) buses and taxis.")
+
+	-- 2. CANLI ELEMENT TEMİZLİĞİ (Görünürdeki araçları yok eder)
+	local vehicles = getElementsByType("vehicle")
+	local count = 0
 	for _, veh in pairs(vehicles) do
-		local vjob = getElementData(veh, "job") or 0
-		local vfaction = getElementData(veh, "faction") or -1
-		if vfaction == -1 and vjob > 0 then
-			local model = getElementModel(veh)
-			if model == 431 or model == 420 or model == 438 then
-				local dbid = getElementData(veh, "dbid")
-				if dbid then
-					mysql:query_free("DELETE FROM vehicles WHERE id = " .. dbid)
-				end
-				destroyElement(veh)
-			end
+		local model = getElementModel(veh)
+		local owner = getElementData(veh, "owner") or -1
+		local faction = getElementData(veh, "faction") or -1
+		
+		-- Sahipsiz ve Job modellerinden ise (Otobüs/Taksi) sil
+		if (model == 431 or model == 420 or model == 438) and owner == -1 and faction == -1 then
+			destroyElement(veh)
+			count = count + 1
 		end
 	end
+	outputDebugString("[JOB-SYSTEM] " .. count .. " existing vehicle elements destroyed.")
 
-	-- 2. VERİTABANI YAKIT GÜNCELLEMESİ (Tüm faction'sız iş araçları için)
+	-- 3. YAKIT GÜNCELLEMESİ (Halihazırda kalan diğer iş araçları varsa diye)
 	mysql:query_free("UPDATE vehicles SET fuel=100 WHERE faction=-1 AND job > 0")
 
-	-- 3. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı)
-	outputDebugString("[JOB-SYSTEM] Spawning 7 buses and 7 taxis symmetrically with 100 fuel...")
+	-- 4. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı)
+	outputDebugString("[JOB-SYSTEM] Spawning 7-7 fresh buses and taxis with 100 fuel...")
 	
 	local startY = -1890
 	local spacing = 12
@@ -183,21 +186,20 @@ function checkAndSpawnJobVehicles()
 		mysql:query_free(taxiQuery)
 	end
 
-	-- 4. ARAÇLARI YENİDEN YÜKLE VE YAKITLARINI SETLE
+	-- 5. ARAÇLARI YENİDEN YÜKLE VE YAKITLARINI SETLE
 	setTimer(function() 
 		if getResourceFromName("vehicle_load") then
 			restartResource(getResourceFromName("vehicle_load")) 
 			setTimer(function()
-				-- Çifte Güvenlik: Yüklenen tüm iş araçlarının yakıtını canlı olarak 100 yap
-				local currentVehicles = exports.pool:getPoolElementsByType("vehicle")
+				local currentVehicles = getElementsByType("vehicle")
 				for _, veh in pairs(currentVehicles) do
 					local job = getElementData(veh, "job") or 0
 					if job > 0 and (getElementData(veh, "faction") or -1) == -1 then
 						exports.anticheat:setEld(veh, "fuel", 100)
 					end
 				end
-				outputDebugString("[JOB-SYSTEM] 14 vehicles reloaded and fueled up to 100.")
-			end, 2000, 1) -- Yüklenmesi için 2 saniye bekle
+				outputDebugString("[JOB-SYSTEM] Final check: 14 vehicles reloaded and fueled up to 100.")
+			end, 2000, 1)
 		end
 	end, 3000, 1)
 end
