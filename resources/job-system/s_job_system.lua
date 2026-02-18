@@ -144,8 +144,6 @@ end
 ]]
 
 -- AUTO SPAWN JOB VEHICLES IF MISSING
--- AUTO SPAWN JOB VEHICLES IF MISSING
--- AUTO SPAWN JOB VEHICLES IF MISSING
 function checkAndSpawnJobVehicles()
 	-- 1. ESKİ ARAÇLARI TEMİZLE
 	local vehicles = exports.pool:getPoolElementsByType("vehicle")
@@ -164,11 +162,11 @@ function checkAndSpawnJobVehicles()
 		end
 	end
 
-	-- 2. YAKIT GÜNCELLEMESİ
+	-- 2. VERİTABANI YAKIT GÜNCELLEMESİ (Tüm faction'sız iş araçları için)
 	mysql:query_free("UPDATE vehicles SET fuel=100 WHERE faction=-1 AND job > 0")
 
 	-- 3. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı)
-	outputDebugString("[JOB-SYSTEM] Spawning 7 buses and 7 taxis symmetrically...")
+	outputDebugString("[JOB-SYSTEM] Spawning 7 buses and 7 taxis symmetrically with 100 fuel...")
 	
 	local startY = -1890
 	local spacing = 12
@@ -176,23 +174,31 @@ function checkAndSpawnJobVehicles()
 	for i = 1, 7 do
 		local currentY = startY - ((i-1) * spacing)
 		
-		-- OTOBÜS (Sol Taraf)
+		-- OTOBÜS (Sol Taraf - X: 1784)
 		local busQuery = "INSERT INTO vehicles SET model=431, x=1784, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=270, currx=1784, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=270, color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=100"
 		mysql:query_free(busQuery)
 		
-		-- TAKSİ (Sağ Taraf - Karşılıklı)
+		-- TAKSİ (Sağ Taraf - X: 1810)
 		local taxiQuery = "INSERT INTO vehicles SET model=420, x=1810, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=90, currx=1810, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=90, color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=100"
 		mysql:query_free(taxiQuery)
 	end
 
-	-- 4. ARAÇLARI YENİDEN YÜKLE
+	-- 4. ARAÇLARI YENİDEN YÜKLE VE YAKITLARINI SETLE
 	setTimer(function() 
 		if getResourceFromName("vehicle_load") then
 			restartResource(getResourceFromName("vehicle_load")) 
-			outputDebugString("[JOB-SYSTEM] 14 job vehicles reloaded successfully.")
+			setTimer(function()
+				-- Çifte Güvenlik: Yüklenen tüm iş araçlarının yakıtını canlı olarak 100 yap
+				local currentVehicles = exports.pool:getPoolElementsByType("vehicle")
+				for _, veh in pairs(currentVehicles) do
+					local job = getElementData(veh, "job") or 0
+					if job > 0 and (getElementData(veh, "faction") or -1) == -1 then
+						exports.anticheat:setEld(veh, "fuel", 100)
+					end
+				end
+				outputDebugString("[JOB-SYSTEM] 14 vehicles reloaded and fueled up to 100.")
+			end, 2000, 1) -- Yüklenmesi için 2 saniye bekle
 		end
 	end, 3000, 1)
 end
-addEventHandler("onResourceStart", resourceRoot, checkAndSpawnJobVehicles)
-
 addEventHandler("onResourceStart", resourceRoot, checkAndSpawnJobVehicles)
