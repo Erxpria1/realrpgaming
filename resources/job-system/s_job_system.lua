@@ -145,13 +145,13 @@ end
 
 -- AUTO SPAWN JOB VEHICLES IF MISSING
 -- AUTO SPAWN JOB VEHICLES IF MISSING
+-- AUTO SPAWN JOB VEHICLES IF MISSING
 function checkAndSpawnJobVehicles()
-	-- 1. ESKİ ARAÇLARI TEMİZLE (İç içe geçme ve yanlış yerleşim sorununu kökten çözer)
+	-- 1. ESKİ ARAÇLARI TEMİZLE
 	local vehicles = exports.pool:getPoolElementsByType("vehicle")
 	for _, veh in pairs(vehicles) do
 		local vjob = getElementData(veh, "job") or 0
 		local vfaction = getElementData(veh, "faction") or -1
-		-- Sadece faction'ı olmayan ve iş aracı olan otobüs/taksileri temizleyelim
 		if vfaction == -1 and vjob > 0 then
 			local model = getElementModel(veh)
 			if model == 431 or model == 420 or model == 438 then
@@ -164,45 +164,35 @@ function checkAndSpawnJobVehicles()
 		end
 	end
 
-	-- 2. VERİTABANI YAKIT GÜNCELLEMESİ (Güvenlik önlemi)
+	-- 2. YAKIT GÜNCELLEMESİ
 	mysql:query_free("UPDATE vehicles SET fuel=100 WHERE faction=-1 AND job > 0")
 
-	-- 3. YENİ OTOBÜSLERİ SPAWN ET
-	outputDebugString("[JOB-SYSTEM] Spawning default buses...")
-	-- Unity Station Bus Stop (Geniş aralık - 25 birim mesafe)
-	local busPositions = {
-		{1784, -1890, 13.4, 0, 0, 270},
-		{1784, -1915, 13.4, 0, 0, 270},
-		{1784, -1940, 13.4, 0, 0, 270},
-		{1784, -1965, 13.4, 0, 0, 270}
-	}
+	-- 3. YENİ ARAÇLARI SPAWN ET (7 Otobüs & 7 Taksi - Karşılıklı)
+	outputDebugString("[JOB-SYSTEM] Spawning 7 buses and 7 taxis symmetrically...")
 	
-	for i, pos in ipairs(busPositions) do
-		local query = "INSERT INTO vehicles SET model=431, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=100"
-		mysql:query_free(query)
+	local startY = -1890
+	local spacing = 12
+
+	for i = 1, 7 do
+		local currentY = startY - ((i-1) * spacing)
+		
+		-- OTOBÜS (Sol Taraf)
+		local busQuery = "INSERT INTO vehicles SET model=431, x=1784, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=270, currx=1784, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=270, color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=100"
+		mysql:query_free(busQuery)
+		
+		-- TAKSİ (Sağ Taraf - Karşılıklı)
+		local taxiQuery = "INSERT INTO vehicles SET model=420, x=1810, y="..currentY..", z=13.4, rotx=0, roty=0, rotz=90, currx=1810, curry="..currentY..", currz=13.4, currrx=0, currry=0, currrz=90, color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=100"
+		mysql:query_free(taxiQuery)
 	end
 
-	-- 4. YENİ TAKSİLERİ SPAWN ET
-	outputDebugString("[JOB-SYSTEM] Spawning default taxis...")
-	-- Unity Station Taxi Stand (Taksiler arası 15 birim mesafe)
-	local taxiPositions = {
-		{1810, -1890, 13.4, 0, 0, 90},
-		{1810, -1905, 13.4, 0, 0, 90},
-		{1810, -1920, 13.4, 0, 0, 90},
-		{1810, -1935, 13.4, 0, 0, 90}
-	}
-	
-	for i, pos in ipairs(taxiPositions) do
-		local query = "INSERT INTO vehicles SET model=420, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=100"
-		mysql:query_free(query)
-	end
-
-	-- 5. ARAÇLARI YENİDEN YÜKLE
+	-- 4. ARAÇLARI YENİDEN YÜKLE
 	setTimer(function() 
 		if getResourceFromName("vehicle_load") then
 			restartResource(getResourceFromName("vehicle_load")) 
-			outputDebugString("[JOB-SYSTEM] Vehicles reloaded successfully.")
+			outputDebugString("[JOB-SYSTEM] 14 job vehicles reloaded successfully.")
 		end
 	end, 3000, 1)
 end
+addEventHandler("onResourceStart", resourceRoot, checkAndSpawnJobVehicles)
+
 addEventHandler("onResourceStart", resourceRoot, checkAndSpawnJobVehicles)
