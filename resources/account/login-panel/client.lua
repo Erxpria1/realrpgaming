@@ -93,7 +93,7 @@ function open_log_reg_pannel()
 		guiLabelSetVerticalAlign(lbl_about_legth,"center")
 		guiLabelSetHorizontalAlign(lbl_about_legth,"center",false)
 		]]
-		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,100,20,"(Remember me!)",false,false)
+		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,100,20,"(Beni hatırla!)",false,false)
 		guiSetFont(panel.login.remember,"default-small")
 
 		panel.login.error = guiCreateLabel(X,Y + 325-120,364,31,"Error_login_tab",false)
@@ -397,9 +397,9 @@ function startLoggingIn()
 		guiSetEnabled(panel.login.login, false)
 		guiSetAlpha(panel.login.login, 0.3)
 		triggerServerEvent("accounts:login:attempt", getLocalPlayer(), username, password, checksave)
-		authen_msg("Login", "Sending request to server..")
+		authen_msg("Login", "Sunucuya istek gönderiliyor..")
 	else
-		Error_msg("Login", "Slow down..")
+		Error_msg("Login", "Yavaşla..")
 	end
 end
 
@@ -501,39 +501,39 @@ end
 
 function registerValidation(username, password, passwordConfirm, email)
 	if not username or username == "" or not password or password == "" or not passwordConfirm or passwordConfirm == "" or not email or email == ""  then
-		guiSetText(panel.login.toplabel, "Please fill out all fields.")
+		guiSetText(panel.login.toplabel, "Lütfen tüm alanları doldurun.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(username) < 3 then
-		guiSetText(panel.login.toplabel, "Username must be 3 characters or longer.")
+		guiSetText(panel.login.toplabel, "Kullanıcı adı en az 3 karakter olmalıdır.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(username) >= 19 then
-		guiSetText(panel.login.toplabel, "Username must be less then 20 characters long.")
+		guiSetText(panel.login.toplabel, "Kullanıcı adı 20 karakterden az olmalıdır.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.find(username, ' ') then
-		guiSetText(panel.login.toplabel, "Invalid Username.")
+		guiSetText(panel.login.toplabel, "Geçersiz Kullanıcı Adı.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.find(password, "'") or string.find(password, '"') then
-		guiSetText(panel.login.toplabel, "Password must not contain ' or "..'"')
+		guiSetText(panel.login.toplabel, "Şifre ' veya "..'" içeremez.')
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(password) < 8 then
-		guiSetText(panel.login.toplabel, "Password must be 8 characters or longer.")
+		guiSetText(panel.login.toplabel, "Şifre en az 8 karakter olmalıdır.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(password) > 25 then
-		guiSetText(panel.login.toplabel, "Password must be less than 25 characters long.")
+		guiSetText(panel.login.toplabel, "Şifre 25 karakterden kısa olmalıdır.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif password ~= passwordConfirm then
-		guiSetText(panel.login.toplabel, "Passwords mismatched!")
+		guiSetText(panel.login.toplabel, "Şifreler eşleşmiyor!")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.match(username,"%W") then
-		guiSetText(panel.login.toplabel, "\"!@#$\"%'^&*()\" are not allowed in username.")
+		guiSetText(panel.login.toplabel, "\"!@#$\"%'^&*()\" karakterleri kullanıcı adında kullanılamaz.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	else
@@ -544,7 +544,7 @@ function registerValidation(username, password, passwordConfirm, email)
 			playSoundFrontEnd ( 4 )
 		else
 			triggerServerEvent("accounts:register:attempt",getLocalPlayer(),username,password,passwordConfirm, email)
-			authen_msg("Register", "Sending request to server.")
+			authen_msg("Register", "Sunucuya istek gönderiliyor.")
 		end
 	end
 end
@@ -568,7 +568,7 @@ function displayRegisterConpleteText(username)
 	local extend = 100
 	local yoffset = 150
 
-	GUIEditor.window[1] = guiCreateWindow(667, 381, 357, 189+extend, "Congratulations! Account has been successfully created!", false)
+	GUIEditor.window[1] = guiCreateWindow(667, 381, 357, 189+extend, "Tebrikler! Hesap başarıyla oluşturuldu!", false)
 	exports.global:centerWindow(GUIEditor.window[1])
 	--local x, y = guiGetPosition(GUIEditor.window[1], false)
 	--guiSetPosition(GUIEditor.window[1], x, y+yoffset, false)
@@ -576,11 +576,11 @@ function displayRegisterConpleteText(username)
     guiWindowSetMovable(GUIEditor.window[1], false)
     guiWindowSetSizable(GUIEditor.window[1], false)
     guiSetProperty(GUIEditor.window[1], "AlwaysOnTop", "True")
-    local temp = "An email contains instructions to activate your account has been dispatched, please check your email's inbox.\n\nIf for some reasons you don't receive the email, please check your junk box or try to dispatch another activation email at https://realrpgaming.net/account/"
-    GUIEditor.label[1] = guiCreateLabel(8, 50, 339, 121+extend, "Your Real Roleplay Gaming account for '"..username.."' is almost ready for action!\n\n"..temp.."\n\nSincerely, \nReal Roleplay Gaming Team\"", false, GUIEditor.window[1])
+    local temp = "Hesabınızı aktif etmek için talimatları içeren bir e-posta gönderildi, lütfen e-postanızın gelen kutusunu kontrol edin.\n\nHangi nedenden dolayı e-postayı alamazsanız, lütfen gereksiz (junk) kutusunu kontrol edin veya https://realrpgaming.net/account/ adresinden yeni bir onay e-postası talep edin."
+    GUIEditor.label[1] = guiCreateLabel(8, 50, 339, 121+extend, "'"..username.."' kullanıcı adıyla Real Roleplay Gaming hesabınız neredeyse hazır!\n\n"..temp.."\n\nSaygılarımızla, \nReal Roleplay Gaming Ekibi\"", false, GUIEditor.window[1])
     guiLabelSetHorizontalAlign(GUIEditor.label[1], "left", true)
 
-    GUIEditor.button[1] = guiCreateButton(10, 153+extend, 337, 26, "Copy Activation Link", false, GUIEditor.window[1])
+    GUIEditor.button[1] = guiCreateButton(10, 153+extend, 337, 26, "Aktivasyon Bağlantısını Kopyala", false, GUIEditor.window[1])
     addEventHandler("onClientGUIClick", GUIEditor.button[1], function()
     	if source == GUIEditor.button[1] then
     		if isElement(GUIEditor.window[1]) then
@@ -674,7 +674,7 @@ function screenStandBy(action, value) -- Maxime / 2015.3.25
 	if action == "add" then
 		screenStandByCurrent = screenStandByCurrent + 1
 		if screenStandByShowing then
-			authen_msg("Login", "Loading prerequisite resources.."..screenStandBy("getPercentage").."%")
+			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..screenStandBy("getPercentage").."%")
 		end
 		return screenStandByCurrent
 	elseif action == "getCurrent" then
@@ -684,14 +684,14 @@ function screenStandBy(action, value) -- Maxime / 2015.3.25
 	elseif action == "setState" then
 		screenStandByShowing = value
 		if screenStandByShowing then
-			authen_msg("Login", "Loading prerequisite resources.."..screenStandBy("getPercentage").."%")
+			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..screenStandBy("getPercentage").."%")
 		end
 		screenStandByCurrent = 0
 		return true
 	elseif action == "getPercentage" then
 		local percentage = math.floor(screenStandByCurrent/screenStandByComplete*100)
 		if screenStandByShowing then
-			authen_msg("Login", "Loading prerequisite resources.."..percentage.."%")
+			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..percentage.."%")
 		end
 		return percentage
 	end
@@ -723,8 +723,8 @@ function drawLoginScreenBranding()
 	dxDrawText("REAL ROLEPLAY GAMING", 2, sHeight * 0.15 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 2.5, "bankgothic", "center", "top", false, false, true)
 	dxDrawText("REAL ROLEPLAY GAMING", 0, sHeight * 0.15, sWidth, sHeight, tocolor(255, 255, 255, 255), 2.5, "bankgothic", "center", "top", false, false, true)
 
-	dxDrawText("ROLEPLAY SERVER", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
-	dxDrawText("ROLEPLAY SERVER", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
+	dxDrawText("ROLEPLAY SUNUCUSU", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
+	dxDrawText("ROLEPLAY SUNUCUSU", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
 end
 
 function updateSoundLabel(state)

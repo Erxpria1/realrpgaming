@@ -20,10 +20,10 @@ function validateCredentials(username,password,checksave)
 			end
 			return true
 		else
-			triggerClientEvent(client,"set_warning_text",client,"Login","Please enter your password!")
+			triggerClientEvent(client,"set_warning_text",client,"Login","Lütfen şifrenizi girin!")
 		end
 	else
-		triggerClientEvent(client,"set_warning_text",client,"Login","Please enter your username!")
+		triggerClientEvent(client,"set_warning_text",client,"Login","Lütfen kullanıcı adınızı girin!")
 	end
 	return false
 end
@@ -68,35 +68,35 @@ function playerLogin(username,password,checksave)
 					local accountData = result[1]
 					-- Check if the account is banned
 					if exports.bans:checkAccountBan(accountData["id"]) then
-						triggerClientEvent(client,"set_warning_text",client,"Login","Account is banned. Appeal at www.realroleplaygaming.net")
+						triggerClientEvent(client,"set_warning_text",client,"Login","Hesabınız yasaklanmıştır. İtiraz için: www.realroleplaygaming.net")
 						exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Rejected connection from " .. getPlayerIP(client) .. " - ".. getPlayerSerial(client) .. " as account is banned.")
 						return false
 					end
 
 					--Now check if passwords are matched or the account is activated, this is to prevent user with fake emails.
-					triggerClientEvent(client,"set_authen_text",client,"Login","Password Accepted! Authenticating..")
+					triggerClientEvent(client,"set_authen_text",client,"Login","Şifre Kabul Edildi! Doğrulanıyor..")
 					-- Check if old method
 					if not string.find(accountData["password"], "$", 1, true) then -- Plain search, not regex
 						local encryptionRule = accountData["salt"]
 						local encryptedPW = string.lower(md5(string.lower(md5(password))..encryptionRule))
 
 						if accountData["password"] ~= encryptedPW then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password(legacy) is incorrect for account name '".. username .."'!")
+							triggerClientEvent(client,"set_warning_text",client,"Login","'".. username .."' hesabının eski şifresi yanlış!")
 							return false
 						end
 
-						triggerClientEvent(client,"set_authen_text",client,"Login","Converting Legacy Password..")
+						triggerClientEvent(client,"set_authen_text",client,"Login","Legacy Şifre Dönüştürülüyor..")
 						-- Run conversions // https://docs.djangoproject.com/en/1.10/topics/auth/passwords/#increasing-the-work-factor // Since Django prefixes it's passwords with the type we do this for compatibility
 						local new_pass = "bcrypt_sha256$" .. bcrypt_hashpw(sha256(password):lower(), bcrypt_gensalt(12)) -- 12 work factor // https://github.com/django/django/blob/master/django/contrib/auth/hashers.py#L404
 						if not dbExec(exports.mysql:getConn("core"), "UPDATE `accounts` SET `password`=?, `salt`=NULL WHERE id=?", new_pass, accountData["id"]) then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password conversion failed for account name '".. username .."'!")
+							triggerClientEvent(client,"set_warning_text",client,"Login","'".. username .."' hesabı için şifre dönüştürme başarısız!")
 							return false
 						end
 					else -- Else if new
 						local verified = bcrypt_checkpw(sha256(password):lower(), accountData["password"]:gsub("bcrypt_sha256%$", "")) -- Take out Django's junk to verify
 
 						if not verified then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password is incorrect for account name '".. username .."'!")
+							triggerClientEvent(client,"set_warning_text",client,"Login","'".. username .."' hesabı için şifre yanlış!")
 							return false
 						end
 					end
@@ -108,7 +108,7 @@ function playerLogin(username,password,checksave)
 					end
 
 					--Validation is done, fetching some more details
-					triggerClientEvent(client,"set_authen_text",client,"Login","Account authenticated!")
+					triggerClientEvent(client,"set_authen_text",client,"Login","Hesap doğrulandı!")
 
 					-- Check the account is already logged in
 					local found = false
@@ -116,8 +116,8 @@ function playerLogin(username,password,checksave)
 						local playerAccountID = tonumber(getElementData(thePlayer, "account:id"))
 						if (playerAccountID) then
 							if (playerAccountID == tonumber(accountData["id"])) and (thePlayer ~= client) then
-								kickPlayer(thePlayer, thePlayer, "Someone else has logged into your account.")
-								triggerClientEvent(client,"set_authen_text",client,"Login","Account is currently online. Disconnecting other user..")
+								kickPlayer(thePlayer, thePlayer, "Hesabınıza başka biri giriş yaptı.")
+								triggerClientEvent(client,"set_authen_text",client,"Login","Hesap şu anda çevrimiçi. Diğer kullanıcının bağlantısı kesiliyor..")
 								break
 							end
 						end
@@ -126,7 +126,7 @@ function playerLogin(username,password,checksave)
 					local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", accountData.id)
 					local result_mta = dbPoll(qb, -1)
 					if not result_mta then
-						triggerClientEvent(client,"set_authen_text",client,"Login","Magic Data connection failed!")
+						triggerClientEvent(client,"set_authen_text",client,"Login","Veri bağlantısı başarısız!")
 						return
 					elseif #result_mta == 0 then
 						if dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?", accountData.id) then
@@ -142,7 +142,7 @@ function playerLogin(username,password,checksave)
 
 					local accountData_mta = getAccountDetails( accountData.id )
 					if not accountData_mta then
-						triggerClientEvent(client,"set_authen_text",client,"Login","Magic Data connection failed!")
+						triggerClientEvent(client,"set_authen_text",client,"Login","Veri bağlantısı başarısız!")
 						return
 					end
 
@@ -274,10 +274,10 @@ function playerLogin(username,password,checksave)
 
 					goFromLoginToSelectionScreen(client)
 				else
-					triggerClientEvent(client,"set_warning_text",client,"Login","Account name '".. username .."' doesn't exist!")
+					triggerClientEvent(client,"set_warning_text",client,"Login","'".. username .."' adında bir hesap bulunamadı!")
 				end
 			else
-				triggerClientEvent(client,"set_warning_text",client,"Login","Failed to connect to game server. Database error!")
+				triggerClientEvent(client,"set_warning_text",client,"Login","Oyun sunucusuna bağlanılamadı. Veritabanı hatası!")
 				dbFree(qh)
 			end
 		end, {username, password, checksave, client}, exports.mysql:getConn("core"), preparedQuery, username)
@@ -355,13 +355,13 @@ function playerRegister(username,password,confirmPassword, email)
 				local preparedQuery2 = "SELECT `mtaserial` FROM `account_details` WHERE `mtaserial`='".. toSQL(mtaSerial) .."' LIMIT 1"
 				local Q2 = mysql:query(preparedQuery2)
 				if not Q2 then
-					triggerClientEvent(client,"set_warning_text",client,"Register","Error code 0003 occurred.")
+					triggerClientEvent(client,"set_warning_text",client,"Register","Hata kodu 0003 oluştu.")
 					return false
 				end
 
 				local usernameExisted = mysql:fetch_assoc(Q2)
 				if (mysql:num_rows(Q2) > 0) and usernameExisted["id"] ~= "1" then
-					triggerClientEvent(client,"set_warning_text",client,"Register","Multiple Accounts is not allowed (Existed: "..tostring(usernameExisted["username"])..")")
+					triggerClientEvent(client,"set_warning_text",client,"Register","Birden fazla hesaba izin verilmiyor (Mevcut: "..tostring(usernameExisted["username"])..")")
 					return false
 				end
 				mysql:free_result(Q2)
@@ -377,10 +377,10 @@ function playerRegister(username,password,confirmPassword, email)
 						local result = dbPoll(qh, 0)
 						if result and #result == 1 then
 							if not dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?, `mtaserial`=?", result[1].id, mtaSerial) then
-								triggerClientEvent(client,"set_warning_text",client,"Register","Error code 0005 occurred.")
+								triggerClientEvent(client,"set_warning_text",client,"Register","Hata kodu 0005 oluştu.")
 							end
 						else
-							triggerClientEvent(client,"set_warning_text",client,"Register","Error code 0004 occurred.")
+							triggerClientEvent(client,"set_warning_text",client,"Register","Hata kodu 0004 oluştu.")
 							dbFree(qh)
 						end
 					end, {client}, exports.mysql:getConn("core"), "SELECT id FROM accounts WHERE username=?", username)

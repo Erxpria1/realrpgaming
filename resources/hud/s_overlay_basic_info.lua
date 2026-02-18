@@ -1,6 +1,6 @@
 function showStats(thePlayer, commandName, targetPlayerName)
 	if getElementData(thePlayer, "loggedin") ~= 1 then
-		outputChatBox("You are not logged in.", thePlayer, 255, 0, 0)
+		outputChatBox("Giriş yapmamışsınız.", thePlayer, 255, 0, 0)
 		return
 	end
 
@@ -11,7 +11,7 @@ function showStats(thePlayer, commandName, targetPlayerName)
 			if getElementData(targetPlayer, "loggedin") == 1 then
 				thePlayer = targetPlayer
 			else
-				outputChatBox("Player is not logged in.", showPlayer, 255, 0, 0)
+				outputChatBox("Oyuncu giriş yapmamış.", showPlayer, 255, 0, 0)
 				return
 			end
 		else
@@ -29,23 +29,23 @@ function showStats(thePlayer, commandName, targetPlayerName)
 	local gunlicense = getElementData(thePlayer, "license.gun")
 	local gun2license = getElementData(thePlayer, "license.gun2")
 	if (carlicense==1) then
-		carlicense = "Yes"
+		carlicense = "Evet"
 	elseif (carlicense==3) then
-		carlicense = "Theory test passed"
+		carlicense = "Teorik sınavı geçti"
 	else
-		carlicense = "No"
+		carlicense = "Hayır"
 	end
 	if (bikelicense==1) then
-		bikelicense = "Yes"
+		bikelicense = "Evet"
 	elseif (bikelicense==3) then
-		bikelicense = "Theory test passed"
+		bikelicense = "Teorik sınavı geçti"
 	else
-		bikelicense = "No"
+		bikelicense = "Hayır"
 	end
 	if (boatlicense==1) then
-		boatlicense = "Yes"
+		boatlicense = "Evet"
 	else
-		boatlicense = "No"
+		boatlicense = "Hayır"
 	end
 	
 	local pilotLicenses = exports.mdc:getPlayerPilotLicenses(thePlayer) or {}
@@ -76,7 +76,7 @@ function showStats(thePlayer, commandName, targetPlayerName)
 		end
 	end
 	if(numAdded == 0) then
-		pilotlicense = "No"
+		pilotlicense = "Hayır"
 	else
 		if numOverflow > 0 then
 			pilotlicense = pilotlicense.." (+"..tostring(numOverflow+typeratings)..")"
@@ -90,19 +90,19 @@ function showStats(thePlayer, commandName, targetPlayerName)
 	end
 	
 	if (fishlicense==1) then
-		fishlicense = "Yes"
+		fishlicense = "Evet"
 	else
-		fishlicense = "No"
+		fishlicense = "Hayır"
 	end
 	if (gunlicense==1) then
-		gunlicense = "Yes"
+		gunlicense = "Evet"
 	else
-		gunlicense = "No"
+		gunlicense = "Hayır"
 	end
 	if (gun2license==1) then
-		gun2license = "Yes"
+		gun2license = "Evet"
 	else
-		gun2license = "No"
+		gun2license = "Hayır"
 	end
 	--VEHICLES
 	local dbid = tonumber(getElementData(thePlayer, "dbid"))
@@ -135,40 +135,40 @@ function showStats(thePlayer, commandName, targetPlayerName)
 		end
 	end
 
-	if (properties=="") then properties = "None.  " end
-	if (carids=="") then carids = "None.  " end
+	if (properties=="") then properties = "Yok.  " end
+	if (carids=="") then carids = "Yok.  " end
 	--FETCH ABOVE
 	local hoursplayed = getElementData(thePlayer, "hoursplayed")
 	local info = {}
 	if isOverlayDisabled then
 		outputChatBox(getPlayerName(thePlayer):gsub("_", " "), showPlayer , 255, 194, 14)
-		outputChatBox(" Drivers License: " .. carlicense, showPlayer)
-		outputChatBox(" Motorcycle License: " .. bikelicense, showPlayer)
-		outputChatBox(" Boating License: " .. boatlicense, showPlayer)
-		outputChatBox(" Pilots License: " .. pilotlicense, showPlayer)
-		outputChatBox(" Tier 1 Firearms License: " .. gunlicense , showPlayer)
-		outputChatBox(" Tier 2 Firearms License: " .. gun2license , showPlayer)
-		outputChatBox(" Fishing Permit: " .. fishlicense, showPlayer)
-		outputChatBox(" Vehicles (" .. printCar .. "): " .. string.sub(carids, 1, string.len(carids)-2) , showPlayer)
-		outputChatBox(" Properties (" .. numproperties .. "/"..(getElementData(thePlayer, "maxinteriors") or 10).."): " .. string.sub(properties, 1, string.len(properties)-2) , showPlayer)
-		outputChatBox(" Time spent on this character: " .. hoursplayed .. " hours." , showPlayer)
-		outputChatBox(" Languages: " , showPlayer)
+		outputChatBox(" Araç Ehliyeti: " .. carlicense, showPlayer)
+		outputChatBox(" Motosiklet Ehliyeti: " .. bikelicense, showPlayer)
+		outputChatBox(" Tekne Ehliyeti: " .. boatlicense, showPlayer)
+		outputChatBox(" Pilotluk Lisansı: " .. pilotlicense, showPlayer)
+		outputChatBox(" Seviye 1 Ateşli Silah Lisansı: " .. gunlicense , showPlayer)
+		outputChatBox(" Seviye 2 Ateşli Silah Lisansı: " .. gun2license , showPlayer)
+		outputChatBox(" Balıkçılık İzni: " .. fishlicense, showPlayer)
+		outputChatBox(" Araçlar (" .. printCar .. "): " .. string.sub(carids, 1, string.len(carids)-2) , showPlayer)
+		outputChatBox(" Mülkler (" .. numproperties .. "/"..(getElementData(thePlayer, "maxinteriors") or 10).."): " .. string.sub(properties, 1, string.len(properties)-2) , showPlayer)
+		outputChatBox(" Karakterde geçirilen süre: " .. hoursplayed .. " saat." , showPlayer)
+		outputChatBox(" Diller: " , showPlayer)
 	else
 		info = {
 			{getPlayerName(thePlayer):gsub("_", " ")},
 			{""},
-			{" Date of birth: "..exports.global:getPlayerDoB(thePlayer)},
-			{" Drivers License: " .. carlicense},
-			{" Motorcycle License: " .. bikelicense},
-			{" Boating License: " .. boatlicense},
-			{" Pilots License: " .. pilotlicense},
-			{" Tier 1 Firearms License: " .. gunlicense},
-			{" Tier 2 Firearms License: " .. gun2license},
-			{" Fishing Permit: " .. fishlicense},
-			{" Vehicles (" .. printCar .. "): " .. string.sub(carids, 1, string.len(carids)-2)},
-			{" Properties (" .. numproperties .. "/"..(getElementData(thePlayer, "maxinteriors") or 10).."): " .. string.sub(properties, 1, string.len(properties)-2)},
-			{" Time spent on this character: " .. hoursplayed .. " hours."},
-			{" Languages: "},
+			{" Doğum tarihi: "..exports.global:getPlayerDoB(thePlayer)},
+			{" Araç Ehliyeti: " .. carlicense},
+			{" Motosiklet Ehliyeti: " .. bikelicense},
+			{" Tekne Ehliyeti: " .. boatlicense},
+			{" Pilotluk Lisansı: " .. pilotlicense},
+			{" Seviye 1 Ateşli Silah Lisansı: " .. gunlicense},
+			{" Seviye 2 Ateşli Silah Lisansı: " .. gun2license},
+			{" Balıkçılık İzni: " .. fishlicense},
+			{" Araçlar (" .. printCar .. "): " .. string.sub(carids, 1, string.len(carids)-2)},
+			{" Mülkler (" .. numproperties .. "/"..(getElementData(thePlayer, "maxinteriors") or 10).."): " .. string.sub(properties, 1, string.len(properties)-2)},
+			{" Karakterde geçirilen süre: " .. hoursplayed .. " saat."},
+			{" Diller: "},
 		}
 	end
 	--LANGUAGES
@@ -190,26 +190,26 @@ function showStats(thePlayer, commandName, targetPlayerName)
 	local job = getElementData(thePlayer, "job") or 0
 	if job == 0 then
 		if isOverlayDisabled then
-			outputChatBox(" Career: Unemployed", showPlayer)
+			outputChatBox(" Meslek: İşsiz", showPlayer)
 		else
-			table.insert(info, {" Career: Unemployed"})
+			table.insert(info, {" Meslek: İşsiz"})
 		end
 	else
 		local jobName = exports["job-system"]:getJobTitleFromID(job)
 		local joblevel = getElementData(thePlayer, "jobLevel") or 1
 		local jobProgress = getElementData(thePlayer, "jobProgress") or 0
 		if isOverlayDisabled then
-			outputChatBox(" Career: "..jobName, showPlayer)
-			outputChatBox("   - Skill Level: "..joblevel, showPlayer)
-			outputChatBox("   - Progress: "..jobProgress, showPlayer)
+			outputChatBox(" Meslek: "..jobName, showPlayer)
+			outputChatBox("   - Yetenek Seviyesi: "..joblevel, showPlayer)
+			outputChatBox("   - İlerleme: "..jobProgress, showPlayer)
 		else
-			table.insert(info, {" Career: "..jobName})
-			table.insert(info, {"   - Skill Level: "..joblevel})
-			table.insert(info, {"   - Progress: "..jobProgress})
+			table.insert(info, {" Meslek: "..jobName})
+			table.insert(info, {"   - Yetenek Seviyesi: "..joblevel})
+			table.insert(info, {"   - İlerleme: "..jobProgress})
 		end
 	end
 	--CARRIED
-	local carried = " Carried Weight: "..("%.2f/%.2f" ):format( exports["item-system"]:getCarriedWeight( thePlayer ), exports["item-system"]:getMaxWeight( thePlayer ) ).." kg(s)"
+	local carried = " Taşınan Ağırlık: "..("%.2f/%.2f" ):format( exports["item-system"]:getCarriedWeight( thePlayer ), exports["item-system"]:getMaxWeight( thePlayer ) ).." kg"
 	if isOverlayDisabled then
 		outputChatBox( carried, showPlayer)
 	else
@@ -220,15 +220,15 @@ function showStats(thePlayer, commandName, targetPlayerName)
 	local bankmoney = getElementData(thePlayer, "bankmoney") or 0
 	local money = getElementData(thePlayer, "money") or 0
 	if isOverlayDisabled then
-		outputChatBox( " Finance: ", showPlayer)
+		outputChatBox( " Finans: ", showPlayer)
 		outputChatBox( "   - GCs: "..exports.global:formatMoney(currentGC), showPlayer)
-		outputChatBox( "   - Money: $"..exports.global:formatMoney(money), showPlayer)
-		outputChatBox( "   - Bank money: $"..exports.global:formatMoney(bankmoney), showPlayer)
+		outputChatBox( "   - Nakit: $"..exports.global:formatMoney(money), showPlayer)
+		outputChatBox( "   - Bankadaki Para: $"..exports.global:formatMoney(bankmoney), showPlayer)
 	else
-		table.insert(info, {" Finance: "})
+		table.insert(info, {" Finans: "})
 		table.insert(info, {"   - GCs: "..exports.global:formatMoney(currentGC)})
-		table.insert(info, {"   - Money: $"..exports.global:formatMoney(money)})
-		table.insert(info, {"   - Bank money: $"..exports.global:formatMoney(bankmoney)})
+		table.insert(info, {"   - Nakit: $"..exports.global:formatMoney(money)})
+		table.insert(info, {"   - Bankadaki Para: $"..exports.global:formatMoney(bankmoney)})
 	end
 	
 	if not isOverlayDisabled then
