@@ -145,6 +145,9 @@ end
 
 -- AUTO SPAWN JOB VEHICLES IF MISSING
 function checkAndSpawnJobVehicles()
+	-- Mevcut job araçlarının yakıtını veritabanında güncelle (benzinsiz başlama sorununu kökten çözer)
+	mysql:query_free("UPDATE vehicles SET fuel=100 WHERE faction=-1 AND job > 0")
+
 	-- 1. BUS CHECK
 	local busCount = 0
 	local buses = exports.pool:getPoolElementsByType("vehicle")
@@ -156,11 +159,11 @@ function checkAndSpawnJobVehicles()
 
 	if busCount == 0 then
 		outputDebugString("[JOB-SYSTEM] No buses found! Spawning default buses...")
-		-- Unity Station Bus Stop (Daha geniş aralık - 20 birim mesafe)
+		-- Unity Station Bus Stop (Geniş aralık - 25 birim mesafe, garaja daha uygun konum)
 		local positions = {
-			{1784, -1905, 13.4, 0, 0, 270},
-			{1784, -1925, 13.4, 0, 0, 270},
-			{1784, -1945, 13.4, 0, 0, 270},
+			{1784, -1890, 13.4, 0, 0, 270},
+			{1784, -1915, 13.4, 0, 0, 270},
+			{1784, -1940, 13.4, 0, 0, 270},
 			{1784, -1965, 13.4, 0, 0, 270}
 		}
 		
@@ -168,7 +171,7 @@ function checkAndSpawnJobVehicles()
 			local query = "INSERT INTO vehicles SET model=431, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0, fuel=100"
 			mysql:query_free(query)
 		end
-		outputDebugString("[JOB-SYSTEM] 3 Buses spawned and saved to DB.")
+		outputDebugString("[JOB-SYSTEM] 4 Buses spawned and saved to DB with full fuel.")
 	end
 
 	-- 2. TAXI CHECK
@@ -181,19 +184,19 @@ function checkAndSpawnJobVehicles()
 
 	if taxiCount == 0 then
 		outputDebugString("[JOB-SYSTEM] No taxis found! Spawning default taxis...")
-		-- Unity Station Taxi Stand (Otobüslerin arkasına, daha geniş aralıkla - 20 birim mesafe)
+		-- Unity Station Taxi Stand (Otobüslerin karşı tarafına, geniş aralıkla - 15 birim mesafe)
 		local positions = {
+			{1810, -1890, 13.4, 0, 0, 90},
 			{1810, -1905, 13.4, 0, 0, 90},
-			{1810, -1925, 13.4, 0, 0, 90},
-			{1810, -1945, 13.4, 0, 0, 90},
-			{1810, -1965, 13.4, 0, 0, 90}
+			{1810, -1920, 13.4, 0, 0, 90},
+			{1810, -1935, 13.4, 0, 0, 90}
 		}
 		
 		for i, pos in ipairs(positions) do
 			local query = "INSERT INTO vehicles SET model=420, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0, fuel=100"
 			mysql:query_free(query)
 		end
-		outputDebugString("[JOB-SYSTEM] 3 Taxis spawned and saved to DB.")
+		outputDebugString("[JOB-SYSTEM] 4 Taxis spawned and saved to DB with full fuel.")
 	end
 	
 	-- Reload vehicles if we spawned any
