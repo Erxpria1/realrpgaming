@@ -1,0 +1,15 @@
+# MTA Server Files
+server/mods/deathmatch/logs/
+server/mods/deathmatch/dump/
+server/mods/deathmatch/local.conf
+server/mods/deathmatch/registry.xml
+server/mods/deathmatch/resources-cache/
+server/mods/deathmatch/internal.db
+server/mods/deathmatch/mta.db
+*.exe
+*.dll
+*.log
+*.tmp
+.DS_Store
+.vscode/
+.idea/

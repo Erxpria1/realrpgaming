@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Gaming Loading Screen</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Arka Plan Videosu veya Görseli -->
+      <div class="background-overlay"></div>
+      <div class="video-container">
+        <video autoplay muted loop id="bg-video">
+          <source src="video.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <!-- İçerik -->
+      <div class="content">
+        <div class="logo-area">
+            <img src="logo.png" alt="Real Gaming Logo" class="main-logo">
+            <h1 class="glitch" data-text="REAL GAMING">REAL GAMING</h1>
+            <p class="tagline">Sınırları Zorla, Şehri Fethet</p>
+        </div>
+
+        <div class="loading-footer">
+          <div class="status-container">
+            <span id="status-text">Sunucu verileri yükleniyor...</span>
+            <span id="percent-text">0%</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" id="bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

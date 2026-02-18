@@ -1,0 +1,17 @@
+<meta>
+    <info name="Real Gaming - Loading Screen" author="Antigravity" type="script" version="1.0.0" />
+    
+    <script src="client.lua" type="client" />
+    
+    <file src="html/index.html" />
+    <file src="html/style.css" />
+    <file src="html/script.js" />
+    <file src="html/logo.png" />
+    <file src="html/video.mp4" />
+    
+    <!-- CEF İzinleri -->
+    <aclrequest>
+        <right name="function.createBrowser" access="true" />
+        <right name="function.loadBrowserURL" access="true" />
+    </aclrequest>
+</meta>
