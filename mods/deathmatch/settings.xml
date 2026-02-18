@@ -1,0 +1,23 @@
+<settings>
+	<setting name="@mysql.production_server" value="0" /> <!-- 0 = Local/Dev server -->
+
+	<!-- MySQL -->
+	<setting name="@mysql.socket" value="" />
+	<!-- MTA DB -->
+	<setting name="@mysql.database" value="mta" />
+	<setting name="@mysql.username" value="root" />
+	<setting name="@mysql.password" value="" />
+	<setting name="@mysql.hostname" value="127.0.0.1" />
+	<setting name="@mysql.port" value="3306" />
+	<!-- Core DB -->
+	<setting name="@mysql.core_database" value="core" />
+	<setting name="@mysql.core_username" value="root" />
+	<setting name="@mysql.core_password" value="" />
+	<setting name="@mysql.core_hostname" value="127.0.0.1" />
+	<setting name="@mysql.core_port" value="3306" />
+
+	<!-- Scanner -->
+	<setting name="@payday.inactivityscanner_vehicles" value="0" />
+	<setting name="@payday.inactivityscanner_interiors" value="0" />
+	<setting name="@item-world.inactivityscanner_items" value="0" />
+</settings>
