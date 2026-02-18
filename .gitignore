@@ -13,3 +13,22 @@ server/mods/deathmatch/mta.db
 .DS_Store
 .vscode/
 .idea/
+
+# Logs
+logs/
+server_auth.log
+
+# Cache
+resource-cache/
+backups/
+dumps/
+
+# Configs (Local sensitive data)
+server-id.keys
+mtaserver.conf.bak
+settings.xml.bak
+registry.db
+
+# OS specific
+Thumbs.db
+
