@@ -25,12 +25,16 @@ local uFont
 function startLoginSound()
 	local setting = loadMusicSetting()
 	if setting == 0 then
-		local sound = math.random( 1, 3 )
-		local bgMusic = playSound ( panel.sounds[ sound ][ 1 ], true )
-		if bgMusic then
-			setSoundVolume( bgMusic, panel.sounds[ sound ][ 2 ] )
+		if #panel.sounds > 0 then
+			local sound = math.random( 1, #panel.sounds )
+			if panel.sounds[sound] then
+				local bgMusic = playSound ( panel.sounds[ sound ][ 1 ], true )
+				if bgMusic then
+					setSoundVolume( bgMusic, panel.sounds[ sound ][ 2 ] )
+				end
+				setElementData(localPlayer, "bgMusic", bgMusic , false)
+			end
 		end
-		setElementData(localPlayer, "bgMusic", bgMusic , false)
 	end
 	updateSoundLabel(setting)
 end
@@ -183,7 +187,7 @@ function open_log_reg_pannel()
 
 		-- fade the login tab in.
 		setTimer( fade.login, 8000, 1 , (sw+Width)/2 )
-
+		
 		-- dynamic screen effect.
 		addEventHandler( 'onClientRender', root, slideScreen )
 
@@ -721,4 +725,10 @@ function drawLoginScreenBranding()
 
 	dxDrawText("ROLEPLAY SERVER", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
 	dxDrawText("ROLEPLAY SERVER", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
+end
+
+function updateSoundLabel(state)
+	-- Placeholder function to prevent errors
+	-- Actual implementation would update a GUI label with sound status
+	return true
 end
