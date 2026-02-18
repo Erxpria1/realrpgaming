@@ -1,0 +1,7 @@
+<meta>
+    <info author="Antigravity" type="script" name="Newbie Help System" description="Support system for new players" />
+    <script src="s_newbie.lua" type="server" />
+    <script src="c_newbie.lua" type="client" />
+    
+    <export function="giveStarterKit" type="server" />
+</meta>

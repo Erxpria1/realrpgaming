@@ -1,0 +1,20 @@
+# Logs
+*.log
+logs/
+server_auth.log
+
+# Cache
+resource-cache/
+backups/
+dumps/
+
+# Configs (Local sensitive data)
+server-id.keys
+mtaserver.conf.bak
+settings.xml.bak
+internal.db
+registry.db
+
+# OS specific
+.DS_Store
+Thumbs.db
