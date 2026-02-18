@@ -11,9 +11,9 @@ local panel = {
 		login = {},
 		register = {},
 		sounds = {
-			-- { 'http://files.owlgaming.net/menu.mp3', 0.3 },
-			-- { 'http://files.owlgaming.net/gtav.mp3', 0.3 },
-			-- { 'http://files.owlgaming.net/gtaiv.mp3', 0.3 },
+			{ 'http://files.owlgaming.net/menu.mp3', 0.3 },
+			{ 'http://files.owlgaming.net/gtav.mp3', 0.3 },
+			{ 'http://files.owlgaming.net/gtaiv.mp3', 0.3 },
 		}
 	}
 local sw, sh = guiGetScreenSize()
@@ -25,16 +25,12 @@ local uFont
 function startLoginSound()
 	local setting = loadMusicSetting()
 	if setting == 0 then
-		if #panel.sounds > 0 then
-			local sound = math.random( 1, #panel.sounds )
-			if panel.sounds[sound] then
-				local bgMusic = playSound ( panel.sounds[ sound ][ 1 ], true )
-				if bgMusic then
-					setSoundVolume( bgMusic, panel.sounds[ sound ][ 2 ] )
-				end
-				setElementData(localPlayer, "bgMusic", bgMusic , false)
-			end
+		local sound = math.random( 1, 3 )
+		local bgMusic = playSound ( panel.sounds[ sound ][ 1 ], true )
+		if bgMusic then
+			setSoundVolume( bgMusic, panel.sounds[ sound ][ 2 ] )
 		end
+		setElementData(localPlayer, "bgMusic", bgMusic , false)
 	end
 	updateSoundLabel(setting)
 end
@@ -42,8 +38,8 @@ end
 function open_log_reg_pannel()
 	if not isElement ( panel.login.main ) then
 		-- blur screen.
-		triggerEvent( 'hud:blur', resourceRoot, 'off', true )
-		setTimer( triggerEvent, 8000, 1, 'hud:blur', resourceRoot, 6, true, 0.1, nil )
+		--triggerEvent( 'hud:blur', resourceRoot, 'off', true )
+		--setTimer( triggerEvent, 8000, 1, 'hud:blur', resourceRoot, 6, true, 0.1, nil )
 
 		-- sound effects.
 		triggerEvent("account:showMusicLabel", localPlayer)
@@ -58,14 +54,12 @@ function open_log_reg_pannel()
 		local Y = (sh/2) - (Height/2)
 		ufont = ufont or guiCreateFont( ':interior_system/intNameFont.ttf', 11 )
 
-		panel.login.main = guiCreateStaticImage( X, Y, 350, 350, "/login-panel/login_window.png", false )
+		panel.login.main = guiCreateStaticImage( X, Y, 350, 350, "login-panel/login_window.png", false )
 		guiSetEnabled (panel.login.main, false)
 
-		-- REPLACED LOGO WITH TEXT BRANDING
-		-- panel.login.logo = guiCreateStaticImage( (sw-logoSize[1])/2, (sh-logoSize[2])/2 , logoSize[1], logoSize[2], "/login-panel/OwlLogo7.png", false )
-		addEventHandler("onClientRender", root, drawLoginScreenBranding)
-
-		-- local x, y = guiGetPosition( panel.login.logo, false )
+		--panel.login.logo = guiCreateStaticImage( (sw-logoSize[1])/2, logoSize[2]/2, logoSize[1], logoSize[2], "/login-panel/OwlLogo7.png", false )
+		panel.login.logo = guiCreateStaticImage( (sw-logoSize[1])/2, (sh-logoSize[2])/2 , logoSize[1], logoSize[2], "/login-panel/OwlLogo7.png", false )
+		local x, y = guiGetPosition( panel.login.logo, false )
 		--guiSetPosition( panel.login.logo, x, -logoSize[2], false )
 
 
@@ -93,7 +87,7 @@ function open_log_reg_pannel()
 		guiLabelSetVerticalAlign(lbl_about_legth,"center")
 		guiLabelSetHorizontalAlign(lbl_about_legth,"center",false)
 		]]
-		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,100,20,"(Beni hatırla!)",false,false)
+		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,100,20,"(Remember me!)",false,false)
 		guiSetFont(panel.login.remember,"default-small")
 
 		panel.login.error = guiCreateLabel(X,Y + 325-120,364,31,"Error_login_tab",false)
@@ -187,9 +181,9 @@ function open_log_reg_pannel()
 
 		-- fade the login tab in.
 		setTimer( fade.login, 8000, 1 , (sw+Width)/2 )
-		
+
 		-- dynamic screen effect.
-		addEventHandler( 'onClientRender', root, slideScreen )
+		--addEventHandler( 'onClientRender', root, slideScreen )
 
 		-- make sure screen isn't black.
 		fadeCamera ( true )
@@ -224,7 +218,7 @@ function fade.render( )
 	fade.logo_start = fade.logo_start + fade.logo_dir
 	if math.abs(fade.cur) <= fade.max then
 		guisSetPosition( 'login', fade.dir )
-		-- guiSetPosition( panel.login.logo, fade.logo_x, fade.logo_start, false )
+		guiSetPosition( panel.login.logo, fade.logo_x, fade.logo_start, false )
 	else
 		guisSetEnabled( 'login', true )
 		removeEventHandler( 'onClientRender', root, fade.render )
@@ -397,9 +391,9 @@ function startLoggingIn()
 		guiSetEnabled(panel.login.login, false)
 		guiSetAlpha(panel.login.login, 0.3)
 		triggerServerEvent("accounts:login:attempt", getLocalPlayer(), username, password, checksave)
-		authen_msg("Login", "Sunucuya istek gönderiliyor..")
+		authen_msg("Login", "Sending request to server..")
 	else
-		Error_msg("Login", "Yavaşla..")
+		Error_msg("Login", "Slow down..")
 	end
 end
 
@@ -419,8 +413,8 @@ function hideLoginPanel(keepBG)
 			end
 		end
 		triggerEvent( 'hud:blur', resourceRoot, 'off', true )
-		removeEventHandler( 'onClientRender', root, slideScreen )
-		removeEventHandler( 'onClientRender', root, drawLoginScreenBranding )
+		--removeEventHandler( 'onClientRender', root, slideScreen )
+		triggerEvent("login-video:hide", localPlayer)
 	end
 end
 addEvent("hideLoginPanel", true)
@@ -444,7 +438,7 @@ function switchToLoginPanel()
 	guiSetText(panel.login.toplabel, "")
 
 	guiSetSize(panel.login.main, 350,350, false)
-	guiStaticImageLoadImage(panel.login.main, "login-panel/Login_window.png" )
+	guiStaticImageLoadImage(panel.login.main, "login-panel/login_window.png" )
 	guiSetVisible(panel.login.register2, false)
 	guiSetVisible(panel.login.cancel,false)
 	guiSetVisible(panel.login.toplabel,false)
@@ -501,39 +495,39 @@ end
 
 function registerValidation(username, password, passwordConfirm, email)
 	if not username or username == "" or not password or password == "" or not passwordConfirm or passwordConfirm == "" or not email or email == ""  then
-		guiSetText(panel.login.toplabel, "Lütfen tüm alanları doldurun.")
+		guiSetText(panel.login.toplabel, "Please fill out all fields.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(username) < 3 then
-		guiSetText(panel.login.toplabel, "Kullanıcı adı en az 3 karakter olmalıdır.")
+		guiSetText(panel.login.toplabel, "Username must be 3 characters or longer.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(username) >= 19 then
-		guiSetText(panel.login.toplabel, "Kullanıcı adı 20 karakterden az olmalıdır.")
+		guiSetText(panel.login.toplabel, "Username must be less then 20 characters long.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.find(username, ' ') then
-		guiSetText(panel.login.toplabel, "Geçersiz Kullanıcı Adı.")
+		guiSetText(panel.login.toplabel, "Invalid Username.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.find(password, "'") or string.find(password, '"') then
-		guiSetText(panel.login.toplabel, "Şifre ' veya "..'" içeremez.')
+		guiSetText(panel.login.toplabel, "Password must not contain ' or "..'"')
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(password) < 8 then
-		guiSetText(panel.login.toplabel, "Şifre en az 8 karakter olmalıdır.")
+		guiSetText(panel.login.toplabel, "Password must be 8 characters or longer.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.len(password) > 25 then
-		guiSetText(panel.login.toplabel, "Şifre 25 karakterden kısa olmalıdır.")
+		guiSetText(panel.login.toplabel, "Password must be less than 25 characters long.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif password ~= passwordConfirm then
-		guiSetText(panel.login.toplabel, "Şifreler eşleşmiyor!")
+		guiSetText(panel.login.toplabel, "Passwords mismatched!")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	elseif string.match(username,"%W") then
-		guiSetText(panel.login.toplabel, "\"!@#$\"%'^&*()\" karakterleri kullanıcı adında kullanılamaz.")
+		guiSetText(panel.login.toplabel, "\"!@#$\"%'^&*()\" are not allowed in username.")
 		guiLabelSetColor ( panel.login.toplabel, 255, 0, 0 )
 		playSoundFrontEnd ( 4 )
 	else
@@ -544,7 +538,7 @@ function registerValidation(username, password, passwordConfirm, email)
 			playSoundFrontEnd ( 4 )
 		else
 			triggerServerEvent("accounts:register:attempt",getLocalPlayer(),username,password,passwordConfirm, email)
-			authen_msg("Register", "Sunucuya istek gönderiliyor.")
+			authen_msg("Register", "Sending request to server.")
 		end
 	end
 end
@@ -568,7 +562,7 @@ function displayRegisterConpleteText(username)
 	local extend = 100
 	local yoffset = 150
 
-	GUIEditor.window[1] = guiCreateWindow(667, 381, 357, 189+extend, "Tebrikler! Hesap başarıyla oluşturuldu!", false)
+	GUIEditor.window[1] = guiCreateWindow(667, 381, 357, 189+extend, "Congratulations! Account has been successfully created!", false)
 	exports.global:centerWindow(GUIEditor.window[1])
 	--local x, y = guiGetPosition(GUIEditor.window[1], false)
 	--guiSetPosition(GUIEditor.window[1], x, y+yoffset, false)
@@ -576,18 +570,18 @@ function displayRegisterConpleteText(username)
     guiWindowSetMovable(GUIEditor.window[1], false)
     guiWindowSetSizable(GUIEditor.window[1], false)
     guiSetProperty(GUIEditor.window[1], "AlwaysOnTop", "True")
-    local temp = "Hesabınızı aktif etmek için talimatları içeren bir e-posta gönderildi, lütfen e-postanızın gelen kutusunu kontrol edin.\n\nHangi nedenden dolayı e-postayı alamazsanız, lütfen gereksiz (junk) kutusunu kontrol edin veya https://realrpgaming.net/account/ adresinden yeni bir onay e-postası talep edin."
-    GUIEditor.label[1] = guiCreateLabel(8, 50, 339, 121+extend, "'"..username.."' kullanıcı adıyla Real Roleplay Gaming hesabınız neredeyse hazır!\n\n"..temp.."\n\nSaygılarımızla, \nReal Roleplay Gaming Ekibi\"", false, GUIEditor.window[1])
+    local temp = "An email contains instructions to activate your account has been dispatched, please check your email's inbox.\n\nIf for some reasons you don't receive the email, please check your junk box or try to dispatch another activation email at https://owlgaming.net/account/"
+    GUIEditor.label[1] = guiCreateLabel(8, 50, 339, 121+extend, "Your OwlGaming MTA account for '"..username.."' is almost ready for action!\n\n"..temp.."\n\nSincerely, \nOwlGaming Community OwlGaming Development Team\"", false, GUIEditor.window[1])
     guiLabelSetHorizontalAlign(GUIEditor.label[1], "left", true)
 
-    GUIEditor.button[1] = guiCreateButton(10, 153+extend, 337, 26, "Aktivasyon Bağlantısını Kopyala", false, GUIEditor.window[1])
+    GUIEditor.button[1] = guiCreateButton(10, 153+extend, 337, 26, "Copy Activation Link", false, GUIEditor.window[1])
     addEventHandler("onClientGUIClick", GUIEditor.button[1], function()
     	if source == GUIEditor.button[1] then
     		if isElement(GUIEditor.window[1]) then
     			destroyElement(GUIEditor.window[1])
     			GUIEditor = nil
     			switchToLoginPanel()
-    			setClipboard("https://realrpgaming.net/account/")
+    			setClipboard("https://owlgaming.net/account/")
     		end
     	else
     		cancelEvent()
@@ -674,7 +668,7 @@ function screenStandBy(action, value) -- Maxime / 2015.3.25
 	if action == "add" then
 		screenStandByCurrent = screenStandByCurrent + 1
 		if screenStandByShowing then
-			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..screenStandBy("getPercentage").."%")
+			authen_msg("Login", "Loading prerequisite resources.."..screenStandBy("getPercentage").."%")
 		end
 		return screenStandByCurrent
 	elseif action == "getCurrent" then
@@ -684,14 +678,14 @@ function screenStandBy(action, value) -- Maxime / 2015.3.25
 	elseif action == "setState" then
 		screenStandByShowing = value
 		if screenStandByShowing then
-			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..screenStandBy("getPercentage").."%")
+			authen_msg("Login", "Loading prerequisite resources.."..screenStandBy("getPercentage").."%")
 		end
 		screenStandByCurrent = 0
 		return true
 	elseif action == "getPercentage" then
 		local percentage = math.floor(screenStandByCurrent/screenStandByComplete*100)
 		if screenStandByShowing then
-			authen_msg("Login", "Gerekli kaynaklar yükleniyor.."..percentage.."%")
+			authen_msg("Login", "Loading prerequisite resources.."..percentage.."%")
 		end
 		return percentage
 	end
@@ -717,18 +711,3 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
 		fileDelete("/login-panel/rememberme.xml")
 	end
 end)
-
-function drawLoginScreenBranding()
-	local sWidth, sHeight = guiGetScreenSize()
-	dxDrawText("REAL ROLEPLAY GAMING", 2, sHeight * 0.15 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 2.5, "bankgothic", "center", "top", false, false, true)
-	dxDrawText("REAL ROLEPLAY GAMING", 0, sHeight * 0.15, sWidth, sHeight, tocolor(255, 255, 255, 255), 2.5, "bankgothic", "center", "top", false, false, true)
-
-	dxDrawText("ROLEPLAY SUNUCUSU", 2, sHeight * 0.15 + 60 + 2, sWidth + 2, sHeight, tocolor(0, 0, 0, 200), 1.2, "default-bold", "center", "top", false, false, true)
-	dxDrawText("ROLEPLAY SUNUCUSU", 0, sHeight * 0.15 + 60, sWidth, sHeight, tocolor(50, 200, 255, 255), 1.2, "default-bold", "center", "top", false, false, true)
-end
-
-function updateSoundLabel(state)
-	-- Placeholder function to prevent errors
-	-- Actual implementation would update a GUI label with sound status
-	return true
-end

@@ -117,7 +117,7 @@ local function moveToElement( element, slot, ammo, event )
 				end
 
 				if not exports.global:isStaffOnDuty(source) and not exports.global:isStaffOnDuty(element) then
-					if hoursPlayedFrom < 10 then
+					--[[if hoursPlayedFrom < 10 then
 						outputChatBox("You require 10 hours of playing time to move a "..getItemName( item[1] ).." to a "..name..".", source, 255, 0, 0)
 						triggerClientEvent( source, event or "finishItemMove", source )
 						return false
@@ -128,7 +128,7 @@ local function moveToElement( element, slot, ammo, event )
 						outputChatBox("You require 10 hours of playing time to receive a "..getItemName( item[1] ).." from "..string.gsub(getPlayerName(source), "_", " ")..".", element, 255, 0, 0)
 						triggerClientEvent( source, event or "finishItemMove", source )
 						return false
-					end
+					end]]
 				end
 				--outputDebugString(hoursPlayedFrom.." "..hoursPlayedTo)
 			end
@@ -241,7 +241,7 @@ local function moveToElement( element, slot, ammo, event )
 						local hoursPlayedFrom = getElementData( source, "hoursplayed" ) or 99
 						local hoursPlayedTo = getElementData( element, "hoursplayed" ) or 99
 						if (getElementType(element) == "player") and (getElementType(source) == "player") then
-							if hoursPlayedFrom < 10 or hoursPlayedTo < 10 then
+							--[[if hoursPlayedFrom < 10 or hoursPlayedTo < 10 then
 								outputChatBox("You require 10 hours of playing time to give money to another player.", source, 255, 0, 0)
 								outputChatBox(exports.global:getPlayerName(source).." requires 10 hours of playing time to give money to you.", element, 255, 0, 0)
 								triggerClientEvent( source, event or "finishItemMove", source )
@@ -250,19 +250,19 @@ local function moveToElement( element, slot, ammo, event )
 								outputChatBox(exports.global:getPlayerName(element).." requires 10 hours of playing time to receive money from you.", source, 255, 0, 0)
 								triggerClientEvent( source, event or "finishItemMove", source )
 								return false
-							end
+							end]]
 						elseif (getElementType(element) == "vehicle") and (getElementType(source) == "player") then
-							if hoursPlayedFrom < 10 then
+							--[[if hoursPlayedFrom < 10 then
 								outputChatBox("You require 10 hours of playing time to store money in a vehicle.", source, 255, 0, 0)
 								triggerClientEvent( source, event or "finishItemMove", source )
 								return false
-							end
+							end]]
 						elseif (getElementType(element) == "object") and (getElementType(source) == "player") then
-							if hoursPlayedFrom < 10 then
+							--[[if hoursPlayedFrom < 10 then
 								outputChatBox("You require 10 hours of playing time to store money in that.", source, 255, 0, 0)
 								triggerClientEvent( source, event or "finishItemMove", source )
 								return false
-							end
+							end]]
 						end
 					end
 
