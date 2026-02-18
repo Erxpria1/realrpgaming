@@ -156,11 +156,11 @@ function checkAndSpawnJobVehicles()
 
 	if busCount == 0 then
 		outputDebugString("[JOB-SYSTEM] No buses found! Spawning default buses...")
-		-- Unity Station Bus Stop
+		-- Unity Station Bus Stop (Daha geniş aralık)
 		local positions = {
-			{1784, -1912, 13.4, 0, 0, 270},
-			{1784, -1918, 13.4, 0, 0, 270},
-			{1784, -1924, 13.4, 0, 0, 270}
+			{1784, -1905, 13.4, 0, 0, 270},
+			{1784, -1915, 13.4, 0, 0, 270},
+			{1784, -1925, 13.4, 0, 0, 270}
 		}
 		
 		for i, pos in ipairs(positions) do
@@ -180,11 +180,11 @@ function checkAndSpawnJobVehicles()
 
 	if taxiCount == 0 then
 		outputDebugString("[JOB-SYSTEM] No taxis found! Spawning default taxis...")
-		-- Unity Station Taxi Stand
+		-- Unity Station Taxi Stand (Otobüslerin arkasına, daha geniş aralıkla)
 		local positions = {
-			{1792, -1912, 13.4, 0, 0, 90},
-			{1792, -1918, 13.4, 0, 0, 90},
-			{1792, -1924, 13.4, 0, 0, 90}
+			{1795, -1905, 13.4, 0, 0, 90},
+			{1795, -1915, 13.4, 0, 0, 90},
+			{1795, -1925, 13.4, 0, 0, 90}
 		}
 		
 		for i, pos in ipairs(positions) do

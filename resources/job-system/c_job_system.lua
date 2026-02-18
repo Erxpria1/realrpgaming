@@ -124,3 +124,27 @@ function cancelJob(button, state)
 		showCursor(false)
 	end
 end
+
+-- JOB INFO PICKUPS
+function createJobPickups()
+	-- Bus Info
+	local busPickup = createPickup(1784, -1912, 13.4, 3, 1239, 0) -- Info icon
+	local busCol = createColSphere(1784, -1912, 13.4, 1.5)
+	
+	addEventHandler("onClientColShapeHit", busCol, function(hitElement)
+		if hitElement == localPlayer and not isPedInVehicle(localPlayer) then
+			exports.hud:sendBottomNotification(localPlayer, "Otobüs Şoförlüğü", "Otobüse binip /startbus yazarak güzergahı başlatabilirsiniz.")
+		end
+	end)
+
+	-- Taxi Info
+	local taxiPickup = createPickup(1795, -1912, 13.4, 3, 1239, 0) -- Info icon
+	local taxiCol = createColSphere(1795, -1912, 13.4, 1.5)
+	
+	addEventHandler("onClientColShapeHit", taxiCol, function(hitElement)
+		if hitElement == localPlayer and not isPedInVehicle(localPlayer) then
+			exports.hud:sendBottomNotification(localPlayer, "Taksi Şoförlüğü", "Taksiye binip müşterileri bekleyin. Taksimetre otomatik açılır.")
+		end
+	end)
+end
+addEventHandler("onClientResourceStart", resourceRoot, createJobPickups)
