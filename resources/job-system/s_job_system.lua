@@ -142,3 +142,65 @@ function resetContract( thePlayer, commandName, targetPlayerName )
 end
 --addCommandHandler("resetcontract", resetContract, false, false)
 ]]
+
+-- AUTO SPAWN JOB VEHICLES IF MISSING
+function checkAndSpawnJobVehicles()
+	-- 1. BUS CHECK
+	local busCount = 0
+	local buses = exports.pool:getPoolElementsByType("vehicle")
+	for key, veh in pairs(buses) do
+		if getElementModel(veh) == 431 then
+			busCount = busCount + 1
+		end
+	end
+
+	if busCount == 0 then
+		outputDebugString("[JOB-SYSTEM] No buses found! Spawning default buses...")
+		-- Unity Station Bus Stop
+		local positions = {
+			{1784, -1912, 13.4, 0, 0, 270},
+			{1784, -1918, 13.4, 0, 0, 270},
+			{1784, -1924, 13.4, 0, 0, 270}
+		}
+		
+		for i, pos in ipairs(positions) do
+			local query = "INSERT INTO vehicles SET model=431, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,255]', color2='[0,0,0]', faction=-1, owner=-1, job=3, plate='BUS-"..i.."', locked=0"
+			mysql:query_free(query)
+		end
+		outputDebugString("[JOB-SYSTEM] 3 Buses spawned and saved to DB.")
+	end
+
+	-- 2. TAXI CHECK
+	local taxiCount = 0
+	for key, veh in pairs(buses) do
+		if getElementModel(veh) == 420 or getElementModel(veh) == 438 then
+			taxiCount = taxiCount + 1
+		end
+	end
+
+	if taxiCount == 0 then
+		outputDebugString("[JOB-SYSTEM] No taxis found! Spawning default taxis...")
+		-- Unity Station Taxi Stand
+		local positions = {
+			{1792, -1912, 13.4, 0, 0, 90},
+			{1792, -1918, 13.4, 0, 0, 90},
+			{1792, -1924, 13.4, 0, 0, 90}
+		}
+		
+		for i, pos in ipairs(positions) do
+			local query = "INSERT INTO vehicles SET model=420, x="..pos[1]..", y="..pos[2]..", z="..pos[3]..", rotx="..pos[4]..", roty="..pos[5]..", rotz="..pos[6]..", currx="..pos[1]..", curry="..pos[2]..", currz="..pos[3]..", currrx="..pos[4]..", currry="..pos[5]..", currrz="..pos[6]..", color1='[255,255,0]', color2='[0,0,0]', faction=-1, owner=-1, job=2, plate='TAXI-"..i.."', locked=0"
+			mysql:query_free(query)
+		end
+		outputDebugString("[JOB-SYSTEM] 3 Taxis spawned and saved to DB.")
+	end
+	
+	-- Reload vehicles if we spawned any
+	if busCount == 0 or taxiCount == 0 then
+		setTimer(function() 
+			if getResourceFromName("vehicle_load") then
+				restartResource(getResourceFromName("vehicle_load")) 
+			end
+		end, 5000, 1) -- Wait 5 sec for DB insert then reload vehicles
+	end
+end
+addEventHandler("onResourceStart", resourceRoot, checkAndSpawnJobVehicles)
