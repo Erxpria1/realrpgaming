@@ -520,12 +520,17 @@ function spawnCharacter(characterID, remoteAccountID, theAdmin, targetAccountNam
         -- Real Roleplay Gaming 2026 - Welcome Message
         setTimer(function(thePlayer)
             if isElement(thePlayer) and getElementData(thePlayer, "loggedin") == 1 then
-                exports.announcement:makePlayerNotification(
-                    thePlayer,
-                    "🎮 REAL ROLEPLAY GAMING 2026",
-                    "2014'ten sonra 2026'da tekrar sizinleyiz!\n📍 instagram: @realroleplay\n💬 discord: discord.gg/realrpg\n\n🔍 Ekip Arıyoruz: Admin, Discord Moderatör",
-                    "info"
-                )
+                -- Ana mesaj
+                outputChatBox("========================================", thePlayer, 255, 194, 14)
+                outputChatBox("🎮 REAL ROLEPLAY GAMING 2026", thePlayer, 0, 255, 255)
+                outputChatBox("", thePlayer, 255, 255, 255)
+                outputChatBox("2014'ten sonra 2026'da tekrar sizinleyiz!", thePlayer, 255, 255, 255)
+                outputChatBox("", thePlayer, 255, 255, 255)
+                outputChatBox("📍 Instagram: @realroleplay", thePlayer, 255, 100, 100)
+                outputChatBox("💬 Discord: discord.gg/realrpg", thePlayer, 100, 100, 255)
+                outputChatBox("", thePlayer, 255, 255, 255)
+                outputChatBox("🔍 Ekip Arıyoruz: Admin, Discord Moderatör", thePlayer, 255, 200, 0)
+                outputChatBox("========================================", thePlayer, 255, 194, 14)
             end
         end, 2000, 1, client)
         if freshSpawn then
