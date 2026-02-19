@@ -15,6 +15,42 @@ local load_speed_multipler = 10
 local load_timeout = 60000 -- 1 minutes.
 local total
 
+local function safeFromJSON(value, fallback)
+	if type(value) ~= "string" or value == "" then
+		return fallback
+	end
+
+	local decoded = fromJSON(value)
+	if decoded == nil or decoded == false then
+		return fallback
+	end
+
+	return decoded
+end
+
+local function getVehicleColorComponentsFromRow(data)
+	local color1 = safeFromJSON(data.color1)
+	local color2 = safeFromJSON(data.color2)
+	local color3 = safeFromJSON(data.color3)
+	local color4 = safeFromJSON(data.color4)
+
+	if type(color1) == "table" and type(color2) == "table" and type(color3) == "table" and type(color4) == "table" then
+		return {
+			tonumber(color1[1]) or 255, tonumber(color1[2]) or 255, tonumber(color1[3]) or 255,
+			tonumber(color2[1]) or 255, tonumber(color2[2]) or 255, tonumber(color2[3]) or 255,
+			tonumber(color3[1]) or 255, tonumber(color3[2]) or 255, tonumber(color3[3]) or 255,
+			tonumber(color4[1]) or 255, tonumber(color4[2]) or 255, tonumber(color4[3]) or 255
+		}
+	end
+
+	return {
+		tonumber(data.color1) or 0,
+		tonumber(data.color2) or 0,
+		tonumber(data.color3) or 0,
+		tonumber(data.color4) or 0
+	}
+end
+
 local query_load = "SELECT v.*, (CASE WHEN ((protected_until IS NULL) OR (protected_until > NOW() = 0)) THEN -1 ELSE TO_SECONDS(protected_until) END) AS protected_until, "
 			.."TO_SECONDS(lastUsed) AS lastused_sec, (CASE WHEN lastlogin IS NOT NULL THEN TO_SECONDS(lastlogin) ELSE NULL END) AS owner_last_login, "
 			.."l.faction AS impounder, "
@@ -111,11 +147,8 @@ function loadOneVehicle(data, loadDeletedOne)
 			end
 
 			-- color
-			local color1 = fromJSON(data.color1)
-			local color2 = fromJSON(data.color2)
-			local color3 = fromJSON(data.color3)
-			local color4 = fromJSON(data.color4)
-			setVehicleColor( veh, color1[1], color1[2], color1[3], color2[1], color2[2], color2[3], color3[1], color3[2], color3[3], color4[1], color4[2], color4[3] )
+				local colorComponents = getVehicleColorComponentsFromRow(data)
+				setVehicleColor(veh, unpack(colorComponents))
 
 			-- set the vehicle armored if it is armored
 			if exports.vehicle:getArmoredCars()[ data.model ] then
@@ -123,34 +156,34 @@ function loadOneVehicle(data, loadDeletedOne)
 			end
 
 			-- upgrades.
-			for slot, upgrade in ipairs( fromJSON( data.upgrades ) ) do
-				if upgrade and tonumber(upgrade) > 0 then
-					addVehicleUpgrade( veh, upgrade )
+				for slot, upgrade in ipairs( safeFromJSON(data.upgrades, {}) ) do
+					if upgrade and tonumber(upgrade) > 0 then
+						addVehicleUpgrade( veh, upgrade )
+					end
 				end
-			end
 
-			-- panels
-			for panel, state in ipairs( fromJSON( data.panelStates ) ) do
-				setVehiclePanelState( veh, panel-1 , tonumber(state) or 0 )
-			end
+				-- panels
+				for panel, state in ipairs( safeFromJSON(data.panelStates, {}) ) do
+					setVehiclePanelState( veh, panel-1 , tonumber(state) or 0 )
+				end
 
-			-- doors
-			for door, state in ipairs( fromJSON( data.doorStates ) ) do
-				setVehicleDoorState( veh, door-1, tonumber(state) or 0 )
-			end
+				-- doors
+				for door, state in ipairs( safeFromJSON(data.doorStates, {}) ) do
+					setVehicleDoorState( veh, door-1, tonumber(state) or 0 )
+				end
 
-			-- lights
-			local lights = fromJSON( data.headlights )
-			if lights then
-				setVehicleHeadLightColor ( veh, lights[1], lights[2], lights[3] )
-			end
-			exports.anticheat:setEld( veh, "headlightcolors", lights, 'all' )
+				-- lights
+				local lights = safeFromJSON(data.headlights)
+				if lights then
+					setVehicleHeadLightColor ( veh, lights[1], lights[2], lights[3] )
+				end
+				exports.anticheat:setEld( veh, "headlightcolors", lights, 'all' )
 
-			-- wheels
-			local wheels = fromJSON( data.wheelStates )
-			if wheels then
-				setVehicleWheelStates( veh, tonumber(wheels[1]) , tonumber(wheels[2]) , tonumber( wheels[3]) , tonumber(wheels[4]) )
-			end
+				-- wheels
+				local wheels = safeFromJSON(data.wheelStates)
+				if wheels then
+					setVehicleWheelStates( veh, tonumber(wheels[1]) , tonumber(wheels[2]) , tonumber( wheels[3]) , tonumber(wheels[4]) )
+				end
 
 			-- lock the vehicle if it's locked
 			setVehicleLocked( veh, data.owner ~= -1 and data.locked == 1 )
@@ -204,8 +237,8 @@ function loadOneVehicle(data, loadDeletedOne)
 				exports.anticheat:setEld( veh, "protected_until", data.protected_until, 'all' )
 			end
 
-			local customTextures = fromJSON(data.textures) or {}
-			exports.anticheat:setEld( veh, "textures", customTextures, 'all' )
+				local customTextures = safeFromJSON(data.textures, {})
+				exports.anticheat:setEld( veh, "textures", customTextures, 'all' )
 
 			exports.anticheat:setEld( veh, "deleted", data.deleted, 'all' )
 			exports.anticheat:setEld( veh, "chopped", data.chopped, 'all' )
@@ -287,14 +320,12 @@ function loadOneVehicle(data, loadDeletedOne)
 				exports.vehicle_manager:loadCustomVehProperties( veh )
 			end
 
-			--settings
-			local settings
-			if data.settings then
-				settings = fromJSON(data.settings)
-			else
-				settings = {}
-			end
-			exports.anticheat:setEld(veh, "settings", settings or {}, false)
+				--settings
+				local settings = safeFromJSON(data.settings, {})
+				if type(settings) ~= "table" then
+					settings = {}
+				end
+				exports.anticheat:setEld(veh, "settings", settings or {}, false)
 		end
 	-- load one.
 	elseif tonumber(data) then

@@ -30,6 +30,28 @@ local function trim(value)
 	return (tostring(value or ""):gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
+local function normalizeResultId(resultId)
+	if resultId == nil then
+		return nil
+	end
+
+	local numericResultId = tonumber(resultId)
+	if numericResultId then
+		return numericResultId
+	end
+
+	return resultId
+end
+
+local function getResultPoolEntry(resultId)
+	local normalizedId = normalizeResultId(resultId)
+	if normalizedId == nil then
+		return nil, nil
+	end
+
+	return resultPool[normalizedId], normalizedId
+end
+
 local function normalizeTableName(rawName)
 	if not rawName then
 		return nil
@@ -166,11 +188,12 @@ function query_free(sql, ...)
 end
 
 function rows_assoc(resultId)
-	return resultPool[resultId] and resultPool[resultId].data or false
+	local pool = getResultPoolEntry(resultId)
+	return pool and pool.data or false
 end
 
 function fetch_assoc(resultId)
-	local pool = resultPool[resultId]
+	local pool = getResultPoolEntry(resultId)
 	if not pool then
 		return false
 	end
@@ -184,11 +207,17 @@ function fetch_assoc(resultId)
 end
 
 function free_result(resultId)
-	resultPool[resultId] = nil
+	local _, normalizedId = getResultPoolEntry(resultId)
+	if not normalizedId then
+		return false
+	end
+
+	resultPool[normalizedId] = nil
+	return true
 end
 
 function result(resultId, row, field)
-	local pool = resultPool[resultId]
+	local pool = getResultPoolEntry(resultId)
 	if not pool or not pool.data[row + 1] then
 		return false
 	end
@@ -196,11 +225,13 @@ function result(resultId, row, field)
 end
 
 function num_rows(resultId)
-	return resultPool[resultId] and resultPool[resultId].count or 0
+	local pool = getResultPoolEntry(resultId)
+	return pool and pool.count or 0
 end
 
 function insert_id(resultId)
-	return resultPool[resultId] and resultPool[resultId].last_id or false
+	local pool = getResultPoolEntry(resultId)
+	return pool and pool.last_id or false
 end
 
 function query_fetch_assoc(sql, ...)
@@ -245,7 +276,8 @@ function returnQueryStats()
 end
 
 function getOpenQueryStr(resultId)
-	return resultPool[resultId] and resultPool[resultId].str or ""
+	local pool = getResultPoolEntry(resultId)
+	return pool and pool.str or ""
 end
 
 function forumQuery(sql, ...)
