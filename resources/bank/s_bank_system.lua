@@ -16,6 +16,34 @@ function setElementDataEx(theElement, theParameter, theValue, syncToClient, noSy
 	return true
 end
 
+local function parseAmount(amount)
+	amount = tonumber(amount)
+	if not amount then
+		return false
+	end
+
+	amount = math.floor(amount)
+	if amount <= 0 then
+		return false
+	end
+
+	-- Prevent nonsense payloads from remote events.
+	if amount > 100000000 then
+		return false
+	end
+
+	return amount
+end
+
+local function hasFinancePermission(thePlayer, factionID)
+	factionID = tonumber(factionID)
+	if not factionID then
+		return false
+	end
+
+	return exports.factions:hasMemberPermissionTo(thePlayer, factionID, "manage_finance")
+end
+
 
 addEventHandler( "onResourceStart", getResourceRootElement(),
 	function()
@@ -50,6 +78,11 @@ function withdrawMoneyPersonal(amount)
 	if (state == 0) then
 		return
 	end
+
+	amount = parseAmount(amount)
+	if not amount then
+		return outputChatBox("Invalid amount.", client, 255, 0, 0)
+	end
 	
 	local money = getElementData(client, "bankmoney") - amount
 	if money >= 0 then
@@ -74,6 +107,12 @@ function depositMoneyPersonal(amount)
 	if (state == 0) then
 		return
 	end
+
+	amount = parseAmount(amount)
+	if not amount then
+		return outputChatBox("Invalid amount.", client, 255, 0, 0)
+	end
+
 	if exports.global:takeMoney(client, amount, nil, true) then
 			local money = getElementData(client, "bankmoney")
 			setElementDataEx(client, "bankmoney", money+amount, true)
@@ -93,8 +132,21 @@ function withdrawMoneyBusiness(amount, factionID)
 	if (state == 0) then
 		return
 	end
+
+	amount = parseAmount(amount)
+	if not amount then
+		return outputChatBox("Invalid amount.", client, 255, 0, 0)
+	end
+
+	if not hasFinancePermission(client, factionID) then
+		return outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
+	end
 	
 	local theTeam = exports.factions:getFactionFromID(factionID)
+	if not theTeam then
+		return outputChatBox("Faction not found.", client, 255, 0, 0)
+	end
+
 	if exports.global:takeMoney(theTeam, amount) then
 		if exports.global:giveMoney(client, amount) then
 			mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string(-getElementData(theTeam, "id")) .. ", " .. mysql:escape_string(getElementData(client, "dbid")) .. ", " .. mysql:escape_string(amount) .. ", '', 4)" ) 
@@ -111,8 +163,22 @@ function depositMoneyBusiness(amount, factionID)
 	if (state == 0) then
 		return
 	end
+
+	amount = parseAmount(amount)
+	if not amount then
+		return outputChatBox("Invalid amount.", client, 255, 0, 0)
+	end
+
+	if not hasFinancePermission(client, factionID) then
+		return outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
+	end
+
 	if exports.global:takeMoney(client, amount) then
 		local theTeam = exports.factions:getFactionFromID(factionID)
+		if not theTeam then
+			return outputChatBox("Faction not found.", client, 255, 0, 0)
+		end
+
 		if exports.global:giveMoney(theTeam, amount) then
 			mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string(getElementData(client, "dbid")) .. ", " .. mysql:escape_string(-getElementData(theTeam, "id")) .. ", " .. mysql:escape_string(amount) .. ", '', 5)" )
 			outputChatBox("You deposited $" .. exports.global:formatMoney(amount) .. " into your business account.", client, 255, 194, 14)
@@ -128,10 +194,9 @@ addEventHandler("depositMoneyBusiness", getRootElement(), depositMoneyBusiness)
 function transferMoneyToPersonal( fromFactionId, name, amount, reason )
 	if getElementData( client, "loggedin" ) == 1 then
 		-- validate and format amount.
-		if not amount or not tonumber(amount) or tonumber(amount) <=0 then
+		amount = parseAmount(amount)
+		if not amount then
 			return not outputChatBox( "Invalid amount to transfer.", client, 255, 0, 0 )
-		else
-			amount = math.floor(tonumber(amount))
 		end
 		
 		-- validate and format reason
@@ -142,6 +207,10 @@ function transferMoneyToPersonal( fromFactionId, name, amount, reason )
 		local sender = nil
 		-- sending from faction bank.
 		if fromFactionId then
+			if not hasFinancePermission(client, fromFactionId) then
+				return not outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
+			end
+
 			sender = exports.pool:getElement( 'team', fromFactionId )
 			if not sender then 
 				return not outputChatBox( "Transaction failed. Error Code: 147", client, 255, 0, 0 )

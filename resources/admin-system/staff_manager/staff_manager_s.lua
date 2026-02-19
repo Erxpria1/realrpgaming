@@ -9,8 +9,56 @@
 
 local mysql = exports.mysql
 local staffTitles = exports.integration:getStaffTitles()
+
+local function canUseStaffManager(player)
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
+		return false
+	end
+
+	return exports.integration:isPlayerLeadAdmin(player)
+		or exports.integration:isPlayerHeadAdmin(player)
+		or exports.integration:isPlayerScripter(player)
+end
+
+local function sanitizeRanks(ranks)
+	if type(ranks) ~= "table" then
+		return false
+	end
+
+	local out = {}
+	for i = 1, 6 do
+		if ranks[i] ~= nil then
+			local value = tonumber(ranks[i])
+			if not value then
+				return false
+			end
+
+			value = math.floor(value)
+			if value < 0 or value > 20 then
+				return false
+			end
+
+			out[i] = value
+		end
+	end
+
+	return out
+end
+
 function getStaffInfo(username, error)
 	local thePlayer = source
+	if client then
+		thePlayer = client
+	end
+
+	if not canUseStaffManager(thePlayer) then
+		return false
+	end
+
+	if type(username) ~= "string" or #username < 1 then
+		return false
+	end
+
 	local error1 = error
 	dbQuery(function(qh, username, error, source)
 		local result = dbPoll(qh, 0)
@@ -39,6 +87,14 @@ addEventHandler("staff:getStaffInfo", root, getStaffInfo)
 
 function getTeamsData()
 	local thePlayer = source
+	if client then
+		thePlayer = client
+	end
+
+	if not canUseStaffManager(thePlayer) then
+		return false
+	end
+
 	staffTitles = exports.integration:getStaffTitles()
 	local users = {}
 	dbQuery(
@@ -97,6 +153,15 @@ addEvent("staff:getTeamsData", true)
 addEventHandler("staff:getTeamsData", root, getTeamsData)
 
 function getChangelogs()
+	local thePlayer = source
+	if client then
+		thePlayer = client
+	end
+
+	if not canUseStaffManager(thePlayer) then
+		return false
+	end
+
 	local changelogs = {}
 	local mQuery1 = nil
 	mQuery1 = mysql:query("SELECT (CASE WHEN to_rank>from_rank THEN 1 ELSE 0 END) AS promoted, s.id, s.userid, team, from_rank, to_rank, s.`by` AS `by`, details, DATE_FORMAT(date,'%b %d, %Y %h:%i %p') AS date FROM staff_changelogs s ORDER BY id DESC")
@@ -114,6 +179,15 @@ addEvent("staff:getChangelogs", true)
 addEventHandler("staff:getChangelogs", root, getChangelogs)
 
 function editStaff(userid, ranks, details)
+	local thePlayer = source
+	if client then
+		thePlayer = client
+	end
+
+	if not canUseStaffManager(thePlayer) then
+		return false
+	end
+
 	local error = nil
 	if not userid or not tonumber(userid) then
 		outputChatBox("Internal Error!", source, 255, 0, 0)
@@ -121,6 +195,13 @@ function editStaff(userid, ranks, details)
 	else
 		userid = tonumber(userid)
 	end
+
+	ranks = sanitizeRanks(ranks)
+	if not ranks then
+		outputChatBox("Invalid rank payload.", thePlayer, 255, 0, 0)
+		return false
+	end
+
 	local target = false
 	for i, player in pairs(getElementsByType("player")) do
 		if getElementData(player, "account:id") == userid then
@@ -129,7 +210,6 @@ function editStaff(userid, ranks, details)
 		end
 	end
 	staffTitles = exports.integration:getStaffTitles()
-	local thePlayer = source
 	dbQuery(function(qh, userid, staffTitles, target, userid, ranks, details, thePlayer)
 		local result = dbPoll(qh, 0)
 		if result then
