@@ -1,0 +1,7 @@
+<meta>
+<info author="MRPICO" name="pd" type="misc" version="1.0"></info>
+<script src="client.lua" type="client"/>
+<file src="pd.txd" type="client"/>
+<file src="pd.dff" type="client"/>
+<file src="pd.col" type="client"/>
+</meta>

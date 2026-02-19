@@ -1,0 +1,7 @@
+<meta>
+<info author="MRPICO" name="intpd" type="misc" version="1.0"></info>
+<script src="client.lua" type="client"/>
+<file src="intpd.txd" type="client"/>
+<file src="intpd.dff" type="client"/>
+<file src="intpd.col" type="client"/>
+</meta>
