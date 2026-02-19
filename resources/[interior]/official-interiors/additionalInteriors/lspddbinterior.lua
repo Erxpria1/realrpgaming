@@ -198,35 +198,24 @@ createObject(2922,51.40000153,-75.00000000,801.88000488,0.00000000,0.00000000,0.
 for index, object in ipairs ( objects ) do
     setElementDoubleSided ( object, true )
 	setElementCollisionsEnabled ( object, true )
-	setElementDimension( object, 444)
+	setElementDimension( object, 65535 )
 	setElementInterior( object, 5)
 end
 
-local col = createColSphere(14.099609375, -70.568359375, 827.76251220703, 270)
---[[
-local function watchChanges( )
-	if getElementDimension( getLocalPlayer( ) ) > 0 and getElementDimension( getLocalPlayer( ) ) ~= getElementDimension( objects[1] ) and getElementInterior( getLocalPlayer( ) ) == getElementInterior( objects[1] ) then
-		for key, value in pairs( objects ) do
-			setElementDimension( value, getElementDimension( getLocalPlayer( ) ) )
-		end
-	elseif getElementDimension( getLocalPlayer( ) ) == 0 and getElementDimension( objects[1] ) ~= 65535 then
-		for key, value in pairs( objects ) do
-			setElementDimension( value, 65535 )
+local function syncLSPDDBInteriorDimension()
+	local localPlayer = getLocalPlayer()
+	local targetDimension = 65535
+
+	if getElementInterior(localPlayer) == 5 and getElementDimension(localPlayer) > 0 then
+		targetDimension = getElementDimension(localPlayer)
+	end
+
+	if getElementDimension(objects[1]) ~= targetDimension then
+		for _, value in pairs(objects) do
+			setElementDimension(value, targetDimension)
 		end
 	end
 end
-addEventHandler( "onClientColShapeHit", col,
-	function( element )
-		if element == getLocalPlayer( ) then
-			addEventHandler( "onClientRender", root, watchChanges )
-		end
-	end
-)
-addEventHandler( "onClientColShapeLeave", col,
-	function( element )
-		if element == getLocalPlayer( ) then
-			removeEventHandler( "onClientRender", root, watchChanges )
-		end
-	end
-)]]
--- Put them standby for now.
+
+syncLSPDDBInteriorDimension()
+setTimer(syncLSPDDBInteriorDimension, 1000, 0)

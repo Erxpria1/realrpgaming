@@ -1,6 +1,5 @@
 wEmployment, jobList, bAcceptJob, bCancel = nil
 
---[[
 local jessie = createPed( 141, 1474.5302734375, -1936.638671875, 290.70001220703 )
 setPedRotation( jessie, 0 )
 setElementDimension( jessie, 9 )
@@ -9,7 +8,6 @@ setElementData( jessie, "talk", 1, false )
 setElementData( jessie, "name", "Jessie Smith", false )
 --setPedAnimation ( jessie, "INT_OFFICE", "OFF_Sit_Idle_Loop", -1, true, false, false )
 setElementFrozen(jessie, true)
---]]
 
 function showEmploymentWindow()
 

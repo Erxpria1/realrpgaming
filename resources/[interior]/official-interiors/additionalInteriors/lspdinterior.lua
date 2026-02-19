@@ -152,38 +152,27 @@ createObject(2930,218.39999390,116.59999847,1000.59997559,0.00000000,0.00000000,
 createObject(3089,253.19999695,108.59999847,1003.50000000,0.00000000,0.00000000,269.99450684) --interviewclosed
 }
 
---local col = createColSphere(227.60000610,116.80000305,999.20001221,0)
---removeWorldModel(14847, 5, 246.23500061,117.80500031,1005.60998535, 10)
---[[
-local function watchChanges( )
-	if getElementDimension( getLocalPlayer( ) ) > 0 and getElementDimension( getLocalPlayer( ) ) ~= getElementDimension( objects[1] ) and getElementInterior( getLocalPlayer( ) ) == getElementInterior( objects[1] ) then
-		for key, value in pairs( objects ) do
-			setElementDimension( value, getElementDimension( getLocalPlayer( ) ) )
-		end
-	elseif getElementDimension( getLocalPlayer( ) ) == 0 and getElementDimension( objects[1] ) ~= 65535 then
-		for key, value in pairs( objects ) do
-			setElementDimension( value, 65535 )
+local function syncLSPDInteriorDimension()
+	local localPlayer = getLocalPlayer()
+	local targetDimension = 65535
+
+	if getElementInterior(localPlayer) == 10 and getElementDimension(localPlayer) > 0 then
+		targetDimension = getElementDimension(localPlayer)
+	end
+
+	if getElementDimension(objects[1]) ~= targetDimension then
+		for _, value in pairs(objects) do
+			setElementDimension(value, targetDimension)
 		end
 	end
 end
-addEventHandler( "onClientColShapeHit", col,
-	function( element )
-		if element == getLocalPlayer( ) then
-			addEventHandler( "onClientRender", root, watchChanges )
-		end
-	end
-)
-addEventHandler( "onClientColShapeLeave", col,
-	function( element )
-		if element == getLocalPlayer( ) then
-			removeEventHandler( "onClientRender", root, watchChanges )
-		end
-	end
-)]]
--- Put them standby for now.
+
 for key, value in pairs( objects ) do
-	setElementDimension( value, 1)
+	setElementDimension( value, 65535 )
 	setElementInterior( value, 10)
 	setElementDoubleSided ( value, true )
 	setElementCollisionsEnabled ( value, true )
 end
+
+syncLSPDInteriorDimension()
+setTimer(syncLSPDInteriorDimension, 1000, 0)
