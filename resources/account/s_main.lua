@@ -38,7 +38,12 @@ function resourceStart(resource)
 
 	local appsRes = getResourceFromName("apps")
 	if appsRes then
-		restartResource(appsRes)
+		local appsState = getResourceState(appsRes)
+		if appsState == "running" then
+			restartResource(appsRes)
+		elseif appsState == "loaded" then
+			startResource(appsRes)
+		end
 	end
 end
 addEventHandler("onResourceStart", getResourceRootElement(getThisResource()), resourceStart)

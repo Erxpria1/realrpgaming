@@ -973,6 +973,18 @@ CREATE TABLE IF NOT EXISTS `mdc_apb` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
+-- Dumping structure for table mta.mdc_anpr
+CREATE TABLE IF NOT EXISTS `mdc_anpr` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicle_plate` varchar(32) NOT NULL,
+  `description` text NOT NULL,
+  `doneby` int(11) NOT NULL,
+  `time` int(11) NOT NULL,
+  `organization` varchar(10) NOT NULL DEFAULT 'LSPD',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+-- Data exporting was unselected.
 -- Dumping structure for table mta.mdc_calls
 CREATE TABLE IF NOT EXISTS `mdc_calls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
