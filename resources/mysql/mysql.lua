@@ -22,58 +22,122 @@ core_username = get( "core_username" )
 core_password = get( "core_password" )
 core_database = get( "core_database" )
 core_port = tonumber( get( "core_port" ) )
+core_fallback_to_mta = get( "core_fallback_to_mta" ) ~= "0"
 
 local dbConns = {}
+local coreAliasAnnounced = false
 
-function createConnection(res, db)
-	if ((db and db == "mta") or not db) and not dbConns.mta then
-		dbConns.mta = dbConnect("mysql","dbname=".. database ..";host="..hostname..";port="..port..";"..socket, username, password, "autoreconnect=1")
-		if dbConns.mta then
-			if eventName then
-				outputDebugString("[MYSQL] createConnection / "..database.." / OK")
-			else
-				connectToDatabase(res) -- Restart the connection for the MySQL Module
-				outputDebugString("[MYSQL] reconnectConnection / "..database.." / OK")
-			end
+local function isValidConnection(conn)
+	return isElement(conn)
+end
+
+local function shouldAliasCoreToMta()
+	if not core_database or tostring(core_database) == "" then
+		return true
+	end
+
+	return tostring(core_database) == tostring(database)
+		and tostring(core_hostname or "") == tostring(hostname or "")
+		and tonumber(core_port or 0) == tonumber(port or 0)
+		and tostring(core_username or "") == tostring(username or "")
+		and tostring(core_password or "") == tostring(password or "")
+end
+
+local function announceCoreAlias(reason)
+	if coreAliasAnnounced then
+		return
+	end
+	coreAliasAnnounced = true
+	outputDebugString("[MYSQL] core connection routed to mta connection ("..reason..")")
+end
+
+local function connectMta(res)
+	if isValidConnection(dbConns.mta) then
+		return dbConns.mta
+	end
+
+	dbConns.mta = dbConnect("mysql", "dbname=".. database ..";host="..hostname..";port="..port..";"..socket, username, password, "autoreconnect=1")
+	if dbConns.mta then
+		if eventName then
+			outputDebugString("[MYSQL] createConnection / "..database.." / OK")
 		else
-			if eventName then
-				-- cancelEvent(true, "Cannot connect to the database.")
-				outputDebugString("[MYSQL] createConnection / "..database.." / FAILED")
-			else
-				outputDebugString("[MYSQL] reconnectConnection / "..database.." / FAILED")
-			end
+			connectToDatabase(res) -- Restart the connection for the MySQL Module
+			outputDebugString("[MYSQL] reconnectConnection / "..database.." / OK")
 		end
-		-- create the migrations table if it didn't already exist.
-		createMigrationsTable()
-	elseif (db and db == "core") and not dbConns.core then
-		dbConns.core = dbConnect("mysql","dbname=".. core_database ..";host="..core_hostname..";port="..core_port..";"..socket, core_username, core_password, "autoreconnect=1")
-		if dbConns.core then
-			if eventName then
-				outputDebugString("[MYSQL] createConnection / "..core_database.." / OK")
-			else
-				outputDebugString("[MYSQL] reconnectConnection / "..core_database.." / OK")
-			end
+	else
+		if eventName then
+			outputDebugString("[MYSQL] createConnection / "..database.." / FAILED")
 		else
-			if eventName then
-				cancelEvent(true, "Cannot connect to the database.")
-				outputDebugString("[MYSQL] createConnection / "..core_database.." / FAILED")
-			else
-				outputDebugString("[MYSQL] reconnectConnection / "..core_database.." / FAILED")
-			end
+			outputDebugString("[MYSQL] reconnectConnection / "..database.." / FAILED")
 		end
 	end
 
+	if isValidConnection(dbConns.mta) then
+		createMigrationsTable()
+	end
+	return dbConns.mta
+end
+
+local function connectCore(res)
+	if isValidConnection(dbConns.core) then
+		return dbConns.core
+	end
+
+	local mtaConn = connectMta(res)
+	if shouldAliasCoreToMta() and isValidConnection(mtaConn) then
+		dbConns.core = mtaConn
+		announceCoreAlias("shared configuration")
+		return dbConns.core
+	end
+
+	dbConns.core = dbConnect("mysql", "dbname=".. core_database ..";host="..core_hostname..";port="..core_port..";"..socket, core_username, core_password, "autoreconnect=1")
+	if dbConns.core then
+		if eventName then
+			outputDebugString("[MYSQL] createConnection / "..core_database.." / OK")
+		else
+			outputDebugString("[MYSQL] reconnectConnection / "..core_database.." / OK")
+		end
+		return dbConns.core
+	end
+
+	if eventName then
+		outputDebugString("[MYSQL] createConnection / "..core_database.." / FAILED")
+	else
+		outputDebugString("[MYSQL] reconnectConnection / "..core_database.." / FAILED")
+	end
+
+	if core_fallback_to_mta and isValidConnection(mtaConn) then
+		dbConns.core = mtaConn
+		announceCoreAlias("fallback after failed core connect")
+	end
+
+	return dbConns.core
+end
+
+function createConnection(res, db)
+	local dbName = db or "mta"
+	if dbName == "core" then
+		connectCore(res)
+	else
+		connectMta(res)
+	end
+
 	if not eventName then
-		return dbConns[db]
+		return dbConns[dbName]
 	end
 end
 addEventHandler("onResourceStart", resourceRoot, createConnection)
 
 function getConn(db)
-	if isElement(dbConns[db or 'mta']) then
-		return dbConns[db or 'mta']
+	local dbName = db or "mta"
+	if isValidConnection(dbConns[dbName]) then
+		return dbConns[dbName]
+	end
+
+	if dbName == "core" then
+		return connectCore(false)
 	else
-		return createConnection(false, db or 'mta')
+		return connectMta(false)
 	end
 end
 

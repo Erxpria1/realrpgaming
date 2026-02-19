@@ -31,13 +31,13 @@ addEvent("onRequestLogin",true)
 addEventHandler("onRequestLogin",getRootElement(),validateCredentials)
 
 function getAccountDetails(id)
-	data = false
+	local data = false
 	local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", id)
 	local result_mta = dbPoll(qb, -1)
 	if not result_mta then
 		outputDebugString("Magic Data connection failed!")
 	elseif #result_mta == 0 then
-		if dbExec(exports.mysql:getConn("mta", "INSERT INTO account_details SET `account_id`=?", id)) then
+		if dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?", id) then
 			local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", id)
 			local result_mta = dbPoll(qb, -1)
 			if result_mta and #result_mta == 1 then
@@ -121,23 +121,6 @@ function playerLogin(username,password,checksave)
 								break
 							end
 						end
-					end
-
-					local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", accountData.id)
-					local result_mta = dbPoll(qb, -1)
-					if not result_mta then
-						triggerClientEvent(client,"set_authen_text",client,"Login","Veri bağlantısı başarısız!")
-						return
-					elseif #result_mta == 0 then
-						if dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?", accountData.id) then
-							local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", accountData.id)
-							local result_mta = dbPoll(qb, -1)
-
-						else
-
-						end
-					else
-						accountData_mta = result_mta[1]
 					end
 
 					local accountData_mta = getAccountDetails( accountData.id )
@@ -352,19 +335,20 @@ function playerRegister(username,password,confirmPassword, email)
 			if #result == 0 then
 				--CHECK FOR EXISTANCE OF MTA SERIAL TO ENCOUNTER MULTIPLE ACCOUNTS PER USER / MAXIME.
 				local mtaSerial = getPlayerSerial(client)
-				local preparedQuery2 = "SELECT `mtaserial` FROM `account_details` WHERE `mtaserial`='".. toSQL(mtaSerial) .."' LIMIT 1"
-				local Q2 = mysql:query(preparedQuery2)
-				if not Q2 then
-					triggerClientEvent(client,"set_warning_text",client,"Register","Hata kodu 0003 oluştu.")
-					return false
-				end
+					local preparedQuery2 = "SELECT `account_id`, `mtaserial` FROM `account_details` WHERE `mtaserial`='".. toSQL(mtaSerial) .."' LIMIT 1"
+					local Q2 = mysql:query(preparedQuery2)
+					if not Q2 then
+						triggerClientEvent(client,"set_warning_text",client,"Register","Hata kodu 0003 oluştu.")
+						return false
+					end
 
-				local usernameExisted = mysql:fetch_assoc(Q2)
-				if (mysql:num_rows(Q2) > 0) and usernameExisted["id"] ~= "1" then
-					triggerClientEvent(client,"set_warning_text",client,"Register","Birden fazla hesaba izin verilmiyor (Mevcut: "..tostring(usernameExisted["username"])..")")
-					return false
-				end
-				mysql:free_result(Q2)
+					local serialOwner = mysql:fetch_assoc(Q2)
+					if (mysql:num_rows(Q2) > 0) and tonumber(serialOwner and serialOwner["account_id"] or 0) ~= 1 then
+						mysql:free_result(Q2)
+						triggerClientEvent(client,"set_warning_text",client,"Register","Birden fazla hesaba izin verilmiyor (Mevcut hesap ID: "..tostring(serialOwner and serialOwner["account_id"] or "?")..")")
+						return false
+					end
+					mysql:free_result(Q2)
 
 				--START CREATING ACCOUNT.
 				local encryptedPW = "bcrypt_sha256$" .. bcrypt_hashpw(sha256(password):lower(), bcrypt_gensalt(12)) -- 12 work factor // https://github.com/django/django/blob/master/django/contrib/auth/hashers.py#L404

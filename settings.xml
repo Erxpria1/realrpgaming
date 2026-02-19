@@ -15,6 +15,7 @@
 	<setting name="@mysql.core_password" value="" />
 	<setting name="@mysql.core_hostname" value="127.0.0.1" />
 	<setting name="@mysql.core_port" value="3306" />
+	<setting name="@mysql.core_fallback_to_mta" value="1" /> <!-- 1 = if core connection fails, route core queries to mta connection -->
 
 	<!-- Scanner -->
 	<setting name="@payday.inactivityscanner_vehicles" value="0" />
